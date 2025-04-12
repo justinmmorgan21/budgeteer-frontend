@@ -7,8 +7,11 @@ export function TransactionsIndex(tx) {
       <h1>All transactions</h1>
       <div>
         {transactions.map(t => (
-          <div key={t.id}>
-            <p>{t.payee}</p>
+          <div key={t.id} style={{border:"solid black 1px", padding:"6px"}}>
+            <span style={{display: "inline-block", width:"140px"}}>{t.type}</span> 
+            <span style={{display: "inline-block", width:"100px"}}> {t.date}</span>
+            <span style={{display: "inline-block", width:"100px"}}> ${t.amount}</span> 
+            <span> {t.payee}</span>
           </div>
         ))}
       </div>
