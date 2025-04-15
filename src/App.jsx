@@ -1,8 +1,8 @@
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
-import { Header } from "./Header";
-import { Home } from "./Home";
-import { TransactionsPage } from "./TransactionsPage";
-import { Footer } from "./Footer";
+import { Header } from "./components/Header";
+import { Home } from "./components/Home";
+import { TransactionsPage } from "./components/TransactionsPage";
+import { Footer } from "./components/Footer";
 
 const router = createBrowserRouter([
   {
@@ -21,6 +21,7 @@ const router = createBrowserRouter([
       {
         path: "/transactions",
         element: <TransactionsPage />,
+        loader: () => 
       }
     ]
   }
