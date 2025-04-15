@@ -1,8 +1,6 @@
 export function TransactionsIndex({transactions, categories}) {
-  console.log("transaction index: ", transactions);
-  console.log("category index: ", categories);
-
   const handleSelect = (event) => {
+    event.preventDefault();
     const params = new FormData(event.target);
     console.log(params);
     console.log(params.get("categories"));

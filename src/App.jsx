@@ -3,6 +3,7 @@ import { Header } from "./components/Header";
 import { Home } from "./components/Home";
 import { TransactionsPage } from "./components/TransactionsPage";
 import { Footer } from "./components/Footer";
+import axios from 'axios'
 
 const router = createBrowserRouter([
   {
@@ -21,7 +22,13 @@ const router = createBrowserRouter([
       {
         path: "/transactions",
         element: <TransactionsPage />,
-        loader: () => 
+        loader: async () => {
+          const [transaction, category] = await Promise.all([
+            axios.get("http://localhost:5000/transactions"),
+            axios.get("http://localhost:5000/categories"),
+          ]);
+          return { transactions: transaction.data, categories: category.data };
+        }
       }
     ]
   }
