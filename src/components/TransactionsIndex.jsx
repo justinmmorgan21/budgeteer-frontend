@@ -6,10 +6,18 @@ export function TransactionsIndex({transactions, categories}) {
     console.log(params.get("categories"));
   }
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const month = date.getMonth() + 1;
+    const day = date.getDay() + 1;
+    const year = date.getFullYear();
+    return month + "/" + day + "/" + year;
+  }
+
   const TransactionItem = ({ t }) => (
     <div style={{border:"solid black 1px", padding:"6px"}}>
       <span style={{display: "inline-block", width:"140px"}}>{t.type}</span>
-      <span style={{display: "inline-block", width:"150px"}}> {t.date}</span>
+      <span style={{display: "inline-block", width:"150px"}}> {formatDate(t.date)}</span>
       <span style={{display: "inline-block", width:"100px"}}> ${t.amount}</span>
       <span style={{display: "inline-block", width:"600px"}}> {t.payee}</span>
       <form onSubmit={handleSelect} action="" style={{  width:"fit-content", display:"inline"}}>
