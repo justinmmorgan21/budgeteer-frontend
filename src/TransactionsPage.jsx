@@ -4,21 +4,33 @@ import { TransactionsIndex } from "./TransactionsIndex";
 
 export function TransactionsPage() {
   const [transactions, setTransactions] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleIndex = () => {
-    console.log("handleIndex");
-    axios.get("http://localhost:5000/transactions").then(response => {
-        console.log("response: ", response.data);
-        setTransactions(response.data);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [transactionResult, categoryResult] = await Promise.all([
+          axios.get("http://localhost:5000/transactions"),
+          axios.get("http://localhost:5000/categories"),
+        ]);
+        setTransactions(transactionResult.data);
+        setCategories(categoryResult.data);
+      } catch (err) {
+        console.error("Error loading data", err);
+      } finally {
+        setLoading(false);
       }
-    )
-  }
+    };
 
-  useEffect(handleIndex, []);
+    fetchData();
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
 
   return (
     <main>
-      <TransactionsIndex tx={transactions}/>
+      <TransactionsIndex transactions={transactions} categories={categories}/>
     </main>
-  )
+  );
 }
