@@ -22,24 +22,32 @@ export function TransactionsIndex({transactions, categories}) {
       <span style={{display: "inline-block", width:"150px"}}> {formatDate(t.date)}</span>
       <span style={{display: "inline-block", width:"100px"}}> ${t.amount}</span>
       <span style={{display: "inline-block", width:"600px"}}> {t.payee}</span>
-      <form onSubmit={handleSelect} action="" style={{  width:"fit-content", display:"inline"}}>
-        <label htmlFor="categories"></label>
-        <select name="categories" >
-          {categories.map(category => (
-            <option key={category.id} value={category.name}>{category.name}</option>
-          ))}
-        </select>
-        &nbsp;
-        <input type="submit" value="select"/>
-      </form>
+      {t.category_tag ? 
+        <span>{t.category_tag.category.name}</span>
+        :
+        (
+        <div style={{ display:"inline"}}>
+          <form onSubmit={handleSelect} action="" style={{  width:"fit-content", display:"inline"}}>
+            <label htmlFor="categories"></label>
+            <select name="categories" >
+              {categories.map(category => (
+                <option key={category.id} value={category.name}>{category.name}</option>
+              ))}
+            </select>
+            &nbsp;
+          </form>
+          <input type="submit" value="select"/>
+        </div>
+        )
+      }
     </div>
   )
 
   const doThis = () => {
     console.log("post");
     const params = new FormData();
-    params.append("category", 99);
-    params.append("tag", 99);
+    params.append("category", 2);
+    params.append("tag", 2);
     axios.post("http://localhost:5000/category_tags", params).then(response => {
       console.log(response.data);
     })
@@ -63,7 +71,7 @@ export function TransactionsIndex({transactions, categories}) {
         <span style={{display: "inline-block", width:"600px"}}>payee</span>
         <span >category</span>
       </div>
-      <div>
+      <div style={{width:"fit-content"}}>
         {transactions.map(t => (
           <TransactionItem key={t.id} t={t} />
         ))}
