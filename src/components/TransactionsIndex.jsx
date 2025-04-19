@@ -1,11 +1,34 @@
-import { useEffect } from "react";
+import { useState } from "react";
 import axios from 'axios';
 
-export function TransactionsIndex({transactions, categories}) {
-  const handleSelect = (event) => {
+export function TransactionsIndex({tx, categories}) {
+
+  const [transactions, setTransactions] = useState(tx);
+
+  const handleCategorySelect = (event, txId) => {
     event.preventDefault();
-    const params = new FormData(event.target);
-    console.log(params.get("categories"));
+    console.log(event.target.value);
+    console.log(txId);
+    const params = new FormData();
+    params.append("category", event.target.value);
+    params.append("tag", 1);
+    axios.post("http://localhost:5000/category_tags", params).then(response => {
+      console.log(response.data);
+      const txParams = new FormData();
+      txParams.append("category_tag", response.data.id);
+      axios.patch(`http://localhost:5000/transactions/${txId}`, txParams).then(response => {
+        console.log(response.data);
+        setTransactions(transactions.map(t => {
+          return (t.id === txId)
+            ? {
+                ...t,
+                category_tag_id: response.data.category_tag_id,
+                category_tag: response.data.category_tag
+              }
+            : t;
+        }));
+      })
+    })
   }
 
   const formatDate = (dateString) => {
@@ -26,43 +49,35 @@ export function TransactionsIndex({transactions, categories}) {
         <span>{t.category_tag.category.name}</span>
         :
         (
-        <div style={{ display:"inline"}}>
-          <form onSubmit={handleSelect} action="" style={{  width:"fit-content", display:"inline"}}>
-            <label htmlFor="categories"></label>
-            <select name="categories" >
+          <div style={{display: "inline-block"}}>
+            <select onChange={(event) => handleCategorySelect(event, t.id)} >
               {categories.map(category => (
-                <option key={category.id} value={category.name}>{category.name}</option>
+                <option key={category.id} name="category" value={category.id}>{category.name}</option>
               ))}
             </select>
-            &nbsp;
-          </form>
-          <input type="submit" value="select"/>
         </div>
+
+        // use below for updating both category and tag later, maybe in a modal
+
+        // <div style={{ display:"inline"}}>
+        //   <form onSubmit={handleSelect} action="" style={{  width:"fit-content", display:"inline"}}>
+        //     <label htmlFor="categories"></label>
+        //     <select name="categories" >
+        //       {categories.map(category => (
+        //         <option key={category.id} value={category.name}>{category.name}</option>
+        //       ))}
+        //     </select>
+        //     &nbsp;
+        //   </form>
+        //   {/* <input type="submit" value="select"/> */}
+        // </div>
         )
       }
     </div>
   )
 
-  const doThis = () => {
-    console.log("post");
-    const params = new FormData();
-    params.append("category", 2);
-    params.append("tag", 2);
-    axios.post("http://localhost:5000/category_tags", params).then(response => {
-      console.log(response.data);
-    })
-  }
-  const doThat = () => {
-    console.log("get");
-    axios.get("http://localhost:5000/category_tags").then(response => {
-      console.log(response.data);
-    })
-  }
-
   return (
     <div>
-      <button onClick={()=>doThis()}>POST</button>
-      <button onClick={()=>doThat()}>GET</button>
       <h1>All transactions</h1>
       <div style={{ padding:"6px"}}>
         <span style={{display: "inline-block", width:"140px"}}>type</span>
