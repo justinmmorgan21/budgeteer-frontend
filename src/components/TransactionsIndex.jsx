@@ -1,8 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from 'axios';
 
 export function TransactionsIndex({tx, categories, tags}) {
   const [transactions, setTransactions] = useState(tx);
+
+  const sortByDate = () => {
+    const dateSorted = [...transactions].sort((a, b) => new Date(a.date) - new Date(b.date));
+    setTransactions(dateSorted);
+  }
 
   const handleCategorySelect = (event, txId) => {
     event.preventDefault();
@@ -53,7 +58,7 @@ export function TransactionsIndex({tx, categories, tags}) {
     <div style={{border:"solid black 1px", padding:"10px"}}>
       <span style={{display: "inline-block", width:"140px"}}>{t.type}</span>
       <span style={{display: "inline-block", width:"150px"}}> {formatDate(t.date)}</span>
-      <span style={{display: "inline-block", width:"100px"}}> ${t.amount}</span>
+      <span style={{display: "inline-block", width:"100px"}}> {t.type==='DEPOSIT' ? `($${t.amount})` : `$${t.amount}`}</span>
       <span style={{display: "inline-block", width:"600px"}}> {t.payee}</span>
       {t.category ? 
         <span style={{display: "inline-block", width:"150px"}}>{t.category.name}</span>
@@ -100,6 +105,8 @@ export function TransactionsIndex({tx, categories, tags}) {
       }
     </div>
   )
+
+  useEffect(sortByDate, []);
 
   return (
     <div>
