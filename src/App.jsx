@@ -23,11 +23,12 @@ const router = createBrowserRouter([
         path: "/transactions",
         element: <TransactionsPage />,
         loader: async () => {
-          const [transaction, category] = await Promise.all([
+          const [transaction, category, tag] = await Promise.all([
             axios.get("http://localhost:5000/transactions"),
             axios.get("http://localhost:5000/categories"),
+            axios.get("http://localhost:5000/tags"),    
           ]);
-          return { transactions: transaction.data, categories: category.data };
+          return { transactions: transaction.data, categories: category.data, tags: tag.data };
         }
       }
     ]
