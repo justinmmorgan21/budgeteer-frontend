@@ -22,29 +22,23 @@ export function TransactionsIndex({tx, categories, tags}) {
     })
   }
   const handleTagSelect = (event, txId) => {
-    // event.preventDefault();
-    // console.log(event.target.value);
-    // console.log(txId);
-    // const params = new FormData();
-    // params.append("tag", event.target.value);
-    // params.append("category", 1);
-    // axios.post("http://localhost:5000/category_tags", params).then(response => {
-    //   console.log(response.data);
-    //   const txParams = new FormData();
-    //   txParams.append("category_tag", response.data.id);
-    //   axios.patch(`http://localhost:5000/transactions/${txId}`, txParams).then(response => {
-    //     console.log(response.data);
-    //     setTransactions(transactions.map(t => {
-    //       return (t.id === txId)
-    //         ? {
-    //             ...t,
-    //             category_tag_id: response.data.category_tag_id,
-    //             category_tag: response.data.category_tag
-    //           }
-    //         : t;
-    //     }));
-    //   })
-    // })
+    event.preventDefault();
+    console.log(event.target.value);
+    console.log(txId);
+    const params = new FormData();
+    params.append("tag", event.target.value);
+    axios.patch(`http://localhost:5000/transactions/${txId}`, params).then(response => {
+      console.log(response.data);
+      setTransactions(transactions.map(t => {
+        return (t.id === txId)
+          ? {
+              ...t,
+              tag_id: response.data.tag_id,
+              tag: response.data.tag
+            }
+          : t;
+      }));
+    })
   }
 
   const formatDate = (dateString) => {
@@ -67,6 +61,7 @@ export function TransactionsIndex({tx, categories, tags}) {
         (
           <div style={{display: "inline-block", width:"150px"}}>
             <select onChange={(event) => handleCategorySelect(event, t.id)} >
+              <option name="category"></option>
               {categories.map(category => (
                 <option key={category.id} name="category" value={category.id}>{category.name}</option>
               ))}
@@ -95,6 +90,7 @@ export function TransactionsIndex({tx, categories, tags}) {
         (t.category?
           <div style={{display: "inline-block"}}>
             <select onChange={(event) => handleTagSelect(event, t.id)} >
+            <option name="category"></option>
               {t.category.tags.map(tag => (
                 <option key={tag.id} name="tag" value={tag.id}>{tag.name}</option>
               ))}
