@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from 'axios';
 
-export function TransactionsIndex({tx, categories, tags}) {
+export function TransactionsIndex({tx, categories, setCategories, tags}) {
   const [transactions, setTransactions] = useState(tx);
 
   const sortByDate = () => {
@@ -9,22 +9,57 @@ export function TransactionsIndex({tx, categories, tags}) {
     setTransactions(dateSorted);
   }
 
-  const handleCategorySelect = (event, txId) => {
+  const addCategory = async () => {
+    const userInput = prompt("Please enter your input:", "enter a new category name");
+    if (userInput !== null) {
+      const params = new FormData();
+      params.append('name', userInput);
+      try {
+        const postResponse = await axios.post('http://localhost:5000/categories', params);
+        const newCategory = postResponse.data;
+  
+        const getResponse = await axios.get('http://localhost:5000/categories');
+        setCategories(getResponse.data);
+  
+        console.log("Returning new category ID:", newCategory.id);
+        return newCategory.id;
+      } catch (error) {
+        console.error("Error adding category:", error);
+        return null;
+      }
+    } else {
+      console.log("User cancelled the prompt.");
+      return null;
+    }
+  }
+
+  const handleCategorySelect = async (event, txId) => {
     event.preventDefault();
     const params = new FormData();
-    params.append("category", event.target.value);
+    let selection = event.target.value;
+    console.log("selection1: ", selection);
+    if (selection === 'addCategory') {
+      selection = await addCategory();
+      if (!selection) {
+        event.target.value = "";
+        return;
+      }
+    }
+    console.log("selection2: ", selection);
+    params.append("category", selection);
     axios.patch(`http://localhost:5000/transactions/${txId}`, params).then(response => {
       console.log(response.data);
       setTransactions(transactions.map(t => {
         return (t.id === txId)  
-          ? {
-              ...t,
-              category_id: response.data.category_id,
-              category: response.data.category
-            }
-          : t;
+        ? {
+          ...t,
+          category_id: response.data.category_id,
+          category: response.data.category
+        }
+        : t;
       }));
     })
+    
   }
   const handleTagSelect = (event, txId) => {
     event.preventDefault();
@@ -67,9 +102,11 @@ export function TransactionsIndex({tx, categories, tags}) {
           <div style={{display: "inline-block", width:"150px"}}>
             <select onChange={(event) => handleCategorySelect(event, t.id)} >
               <option name="category"></option>
-              {categories.map(category => (
+              {categories?.map(category => (
                 <option key={category.id} name="category" value={category.id}>{category.name}</option>
               ))}
+              <option name="category" value="addCategory">+ add a Category</option>
+
             </select>
         </div>
 

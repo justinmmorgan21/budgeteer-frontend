@@ -28,7 +28,7 @@ const router = createBrowserRouter([
             axios.get("http://localhost:5000/categories"),
             axios.get("http://localhost:5000/tags"),    
           ]);
-          return { transactions: transaction.data, categories: category.data, tags: tag.data };
+          return { transactions: transaction.data, cat: category.data, tags: tag.data };
         }
       }
     ]
