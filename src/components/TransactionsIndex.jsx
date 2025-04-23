@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from 'axios';
 
-export function TransactionsIndex({tx, categories, setCategories, tags}) {
+export function TransactionsIndex({tx, categories, setCategories, tags, onEdit}) {
   const [transactions, setTransactions] = useState(tx);
 
   const sortByDate = () => {
@@ -37,7 +37,6 @@ export function TransactionsIndex({tx, categories, setCategories, tags}) {
     event.preventDefault();
     const params = new FormData();
     let selection = event.target.value;
-    console.log("selection1: ", selection);
     if (selection === 'addCategory') {
       selection = await addCategory();
       if (!selection) {
@@ -45,7 +44,6 @@ export function TransactionsIndex({tx, categories, setCategories, tags}) {
         return;
       }
     }
-    console.log("selection2: ", selection);
     params.append("category", selection);
     axios.patch(`http://localhost:5000/transactions/${txId}`, params).then(response => {
       console.log(response.data);
@@ -127,7 +125,7 @@ export function TransactionsIndex({tx, categories, setCategories, tags}) {
         )
       }
       {t.tag ? 
-        <span>{t.tag.name}</span>
+        <span style={{display: "inline-block", width:"150px"}}>{t.tag.name}</span>
         :
         (t.category?
           <div style={{display: "inline-block"}}>
@@ -139,6 +137,11 @@ export function TransactionsIndex({tx, categories, setCategories, tags}) {
             </select>
         </div>:null
         )
+      }
+      {(t.category && t.tag)?
+<button onClick={() => onEdit(t)}>edit</button>
+      :
+null
       }
     </div>
   )
