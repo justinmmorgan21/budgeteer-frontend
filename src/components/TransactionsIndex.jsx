@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from 'axios';
 
-export function TransactionsIndex({tx, categories, setCategories, tags, onEdit}) {
-  const [transactions, setTransactions] = useState(tx);
+export function TransactionsIndex({transactions, categories, setCategories, tags, onEdit, setTransactions}) {
+  // const [transactions, setTransactions] = useState(tx);
 
   const sortByDate = () => {
     const dateSorted = [...transactions].sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -20,8 +20,7 @@ export function TransactionsIndex({tx, categories, setCategories, tags, onEdit})
   
         const getResponse = await axios.get('http://localhost:5000/categories');
         setCategories(getResponse.data);
-  
-        console.log("Returning new category ID:", newCategory.id);
+
         return newCategory.id;
       } catch (error) {
         console.error("Error adding category:", error);
@@ -61,8 +60,6 @@ export function TransactionsIndex({tx, categories, setCategories, tags, onEdit})
   }
   const handleTagSelect = (event, txId) => {
     event.preventDefault();
-    console.log(event.target.value);
-    console.log(txId);
     const params = new FormData();
     params.append("tag", event.target.value);
     axios.patch(`http://localhost:5000/transactions/${txId}`, params).then(response => {
@@ -99,11 +96,11 @@ export function TransactionsIndex({tx, categories, setCategories, tags, onEdit})
         (
           <div style={{display: "inline-block", width:"150px"}}>
             <select onChange={(event) => handleCategorySelect(event, t.id)} >
-              <option name="category"></option>
+              <option></option>
               {categories?.map(category => (
-                <option key={category.id} name="category" value={category.id}>{category.name}</option>
+                <option key={category.id} value={category.id}>{category.name}</option>
               ))}
-              <option name="category" value="addCategory">+ add a Category</option>
+              <option value="addCategory">+ add a Category</option>
 
             </select>
         </div>
@@ -130,9 +127,9 @@ export function TransactionsIndex({tx, categories, setCategories, tags, onEdit})
         (t.category?
           <div style={{display: "inline-block"}}>
             <select onChange={(event) => handleTagSelect(event, t.id)} >
-            <option name="category"></option>
+            <option></option>
               {t.category.tags.map(tag => (
-                <option key={tag.id} name="tag" value={tag.id}>{tag.name}</option>
+                <option key={tag.id} value={tag.id}>{tag.name}</option>
               ))}
             </select>
         </div>:null

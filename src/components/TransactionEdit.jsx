@@ -3,15 +3,10 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 // import apiConfig from "../apiConfig";
 
-export function TransactionEdit( { onClose, tx, categories } ) {
-  console.log(tx);
+export function TransactionEdit( { onClose, tx, categories, setCategories, onUpdate } ) {
   const [payee, setPayee] = useState(tx.payee);
   const [category, setCategory] = useState(tx.category);
   const [tag, setTag] = useState(tx.tag);
-  
-  useEffect(() => {
-
-  }, []);
 
   const navigate = useNavigate();
 
@@ -149,7 +144,6 @@ export function TransactionEdit( { onClose, tx, categories } ) {
         const getResponse = await axios.get('http://localhost:5000/categories');
         setCategories(getResponse.data);
   
-        console.log("Returning new category ID:", newCategory.id);
         return newCategory.id;
       } catch (error) {
         console.error("Error adding category:", error);
@@ -159,6 +153,22 @@ export function TransactionEdit( { onClose, tx, categories } ) {
       console.log("User cancelled the prompt.");
       return null;
     }
+  }
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const params = new FormData(event.target);
+    params.forEach((value, key) => {
+      console.log("key: ", key);
+      console.log("value: ", value);
+    })
+    // console.log("tx: ", tx);
+    axios.patch(`http://localhost:5000/transactions/${tx.id}`, params).then(response => {
+      console.log(response.data);
+      onUpdate(response.data);
+      onClose();
+      navigate(`/transactions`);
+    })
   }
 
   const handleCategorySelect = async (event, txId) => {
@@ -173,18 +183,18 @@ export function TransactionEdit( { onClose, tx, categories } ) {
       }
     }
     params.append("category", selection);
-    // axios.patch(`http://localhost:5000/transactions/${txId}`, params).then(response => {
-    //   console.log(response.data);
-    //   setTransactions(transactions.map(t => {
-    //     return (t.id === txId)  
-    //     ? {
-    //       ...t,
-    //       category_id: response.data.category_id,
-    //       category: response.data.category
-    //     }
-    //     : t;
-    //   }));
-    // })
+    axios.patch(`http://localhost:5000/transactions/${txId}`, params).then(response => {
+      console.log(response.data);
+      setTransactions(transactions.map(t => {
+        return (t.id === txId)  
+        ? {
+          ...t,
+          category_id: response.data.category_id,
+          category: response.data.category
+        }
+        : t;
+      }));
+    })
     
   }
   const handleTagSelect = (event, txId) => {
@@ -207,7 +217,6 @@ export function TransactionEdit( { onClose, tx, categories } ) {
     // })
   }
 
-
   return (
     <div>
         <span>{formatDate(tx.date)}</span>
@@ -217,67 +226,38 @@ export function TransactionEdit( { onClose, tx, categories } ) {
         <span>{tx.type}</span>
         <span>${tx.amount}</span>
       </div>
-
-          <div style={{display: "inline-block", width:"150px"}}>
-            <select onChange={(event) => handleCategorySelect(event, tx.id)} value={category.id}>
-              <option name="category"></option>
+      <hr />
+        <div style={{ display:"inline"}}>
+          <form onSubmit={handleSubmit} style={{  width:"fit-content", display:"inline"}}>
+            <label htmlFor="categories"></label>
+            <select onChange={e=>{
+                if (e.target.value === "addCategory") {
+                  e.target.value = addCategory();
+                } else {
+                  setCategory(categories.find(cat=>cat.id == e.target.value))
+                }
+              }} value={category.id} name="category">
               {categories?.map(category => (
-                <option key={category.id} name="category" value={category.id}>{category.name}</option>
+                <option key={category.id} value={category.id}>{category.name}</option>
               ))}
-              <option name="category" value="addCategory">+ add a Category</option>
-
+              <option value="addCategory">+ add a Category</option>
             </select>
+            <div style={{display: "inline-block"}}>
+              <select onChange={e=>setTag(e.target.value)} value={tag.id} name="tag">
+                {category?.tags.length > 0?
+                  category.tags.map(tag => (
+                    <option key={tag.id} value={tag.id}>{tag.name}</option>
+                  ))
+                :
+                  <option value={""}>null2</option>
+                }
+                <option value="addTag">+ add a Tag</option>
+              </select>
+            </div>
+            &nbsp;
+          <input type="submit" value="update"/>
+          </form>
         </div>
-
-         {/* use below for updating both category and tag later, maybe in a modal
-
-         <div style={{ display:"inline"}}>
-           <form onSubmit={handleSelect} action="" style={{  width:"fit-content", display:"inline"}}>
-             <label htmlFor="categories"></label>
-             <select name="categories" >
-               {categories.map(category => (
-                 <option key={category.id} value={category.name}>{category.name}</option>
-               ))}
-             </select>
-             &nbsp;
-           </form>
-           <input type="submit" value="select"/>
-         </div> */}
-        
-          <div style={{display: "inline-block"}}>
-            <select onChange={(event) => handleTagSelect(event, tx.id)} value={tag.id}>
-            <option name="category"></option>
-              {tx.category.tags.map(tag => (
-                <option key={tag.id} name="tag" value={tag.id}>{tag.name}</option>
-              ))}
-            </select>
-        </div>
-      {/* <form onSubmit={handleSubmit}>
-        <label htmlFor="description">description:</label><br />
-        <textarea name="description" id="description" rows="4" value={description || ""} onChange={(e)=>setDescription(e.target.value)}/><br />
-        <br />
-        {days.map( day => (
-        <div key={day}>
-          <input type="checkbox" checked={isDayChecked[day] || false} name={day} onChange={()=>setIsDayChecked((prevCheckedStates) => ({...prevCheckedStates, [day]: !isDayChecked[day]}))}/> {day}
-        </div>
-        ))}
-        <input type="checkbox" checked={isOneTimerChecked || false} name="one_timer" onChange={()=>setIsOneTimerChecked(!isOneTimerChecked)}/> one-timer (*)<br />
-        <br />
-        <div>Points earned for chore: <input type="text" name="points_awarded" value={points || 0} size="6" onChange={(e)=>setPoints(e.target.value)}/></div>
-        <br />
-        <p>Assign chore to: </p>
-        <div style={{display:"flex", flexDirection:"row", marginTop:"4px"}}>
-          {currentParent.children.map( child => (
-          <div key={child.id} style={{marginRight:"12px"}}>
-            <input type="checkbox" name={child.id} checked={isChildChecked[child.id] || false} onChange={()=>{
-              setIsChildChecked((prevStates)=>({...prevStates, [child.id]: !prevStates[child.id]}));
-            }} /> {child.name}
-          </div>
-          ))}
-        </div>
-        <br />
-        <button type="submit">Update</button>
-      </form> */}
     </div>
   );
 }

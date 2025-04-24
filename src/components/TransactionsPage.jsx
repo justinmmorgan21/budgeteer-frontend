@@ -5,10 +5,11 @@ import { Modal } from "./Modal";
 import { TransactionEdit } from "./TransactionEdit";
 
 export function TransactionsPage() {
-  const { transactions, cat, tags } = useLoaderData();
+  const { transactions: loadedTransactions, cat, tags } = useLoaderData();
+  const [ transactions, setTransactions ] = useState(loadedTransactions);
   const [ categories, setCategories ] = useState(cat);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [currentTx, setCurrentTx] = useState(null);
+  const [ modalVisible, setModalVisible ] = useState(false);
+  const [ currentTx, setCurrentTx ] = useState(null);
 
   const handleClose = () => {
     setModalVisible(false);
@@ -19,11 +20,17 @@ export function TransactionsPage() {
     setCurrentTx(tx);
   }
 
+  const onUpdate = newTx => {
+    setTransactions(prev => 
+      prev.map(t => t.id === newTx.id ? newTx : t)
+    )
+  }
+
   return (
     <main>
-      <TransactionsIndex tx={transactions} categories={categories} setCategories={setCategories} tags={tags} onEdit={handleTxEdit}/>
+      <TransactionsIndex transactions={transactions} categories={categories} setCategories={setCategories} tags={tags} onEdit={handleTxEdit} setTransactions={setTransactions}/>
       <Modal onClose={handleClose} show={modalVisible}>
-        <TransactionEdit onClose={handleClose} tx={currentTx} categories={categories}/>
+        <TransactionEdit onClose={handleClose} tx={currentTx} categories={categories} setCategories={setCategories} onUpdate={onUpdate}/>
       </Modal>
     </main>
   );
