@@ -16,6 +16,7 @@ export function TransactionsPage() {
   }
 
   const handleTxEdit = (tx) => {
+    console.log("on edit: ", tx);
     setModalVisible(true);
     setCurrentTx(tx);
   }
@@ -26,9 +27,15 @@ export function TransactionsPage() {
     )
   }
 
+  const setTxInPage = async (data) => {
+    console.log("data: ", data);
+    setTransactions(data);
+    
+  }
+
   return (
     <main>
-      <TransactionsIndex transactions={transactions} categories={categories} setCategories={setCategories} tags={tags} onEdit={handleTxEdit} setTransactions={setTransactions}/>
+      <TransactionsIndex transactions={transactions} categories={categories} setCategories={setCategories} tags={tags} onEdit={handleTxEdit} setTransactions={setTransactions} setTxInPage={setTxInPage}/>
       <Modal onClose={handleClose} show={modalVisible}>
         <TransactionEdit onClose={handleClose} tx={currentTx} categories={categories} setCategories={setCategories} onUpdate={onUpdate}/>
       </Modal>

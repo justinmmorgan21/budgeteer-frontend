@@ -10,6 +10,9 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
 
   const navigate = useNavigate();
 
+  console.log("tx: ", tx);
+  console.log("categories: ", categories);
+
   // const initializeParams = event => {
   //   let params = new FormData(event.target);
   //   days.forEach( day => {
@@ -133,7 +136,7 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
   }
 
   const addCategory = async () => {
-    const userInput = prompt("Please enter your input:", "enter a new category name");
+    const userInput = prompt("Please enter a new category name:", "category name");
     if (userInput !== null) {
       const params = new FormData();
       params.append('name', userInput);
@@ -145,6 +148,25 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
         setCategories(getResponse.data);
   
         return newCategory.id;
+      } catch (error) {
+        console.error("Error adding category:", error);
+        return null;
+      }
+    } else {
+      console.log("User cancelled the prompt.");
+      return null;
+    }
+  }
+
+  const addTag = async () => {
+    const userInput = prompt("Please enter a new tag name for " + tx.category.name + ":", "tag name", tx.category.name);
+    if (userInput !== null) {
+      const params = new FormData();
+      params.append('name', userInput);
+      params.append('category_id', tx.category_id)
+      try {
+        const postResponse = await axios.post('http://localhost:5000/tags', params);
+        return postResponse.data.id;
       } catch (error) {
         console.error("Error adding category:", error);
         return null;
@@ -229,6 +251,7 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
       <hr />
         <div style={{ display:"inline"}}>
           <form onSubmit={handleSubmit} style={{  width:"fit-content", display:"inline"}}>
+            
             <label htmlFor="categories"></label>
             <select onChange={e=>{
                 if (e.target.value === "addCategory") {
@@ -242,21 +265,23 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
               ))}
               <option value="addCategory">+ add a Category</option>
             </select>
-            <div style={{display: "inline-block"}}>
-              <select onChange={e=>setTag(e.target.value)} value={tag.id} name="tag">
-                {category?.tags.length > 0?
-                  category.tags.map(tag => (
-                    <option key={tag.id} value={tag.id}>{tag.name}</option>
-                  ))
-                :
-                  <option value={""}>null2</option>
-                }
-                <option value="addTag">+ add a Tag</option>
-              </select>
-            </div>
+
+
+
+            <select onChange={e=>setTag(e.target.value)} value={tag?.id} name="tag">
+              {tx.category.tags.length > 0?
+                category.tags.map(tag => (
+                  <option key={tag.id} value={tag.id}>{tag.name}</option>
+                ))
+              :
+                <option value={""}>null2</option>
+              }
+              <option value="addTag">+ add a Tag</option>
+            </select>
             &nbsp;
           <input type="submit" value="update"/>
           </form>
+          <button onClick={onClose} style={{marginLeft:'6px'}}>cancel</button>
         </div>
     </div>
   );

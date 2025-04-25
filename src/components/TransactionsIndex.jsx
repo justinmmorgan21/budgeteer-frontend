@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import axios from 'axios';
 
 export function TransactionsIndex({transactions, categories, setCategories, tags, onEdit, setTransactions}) {
-  // const [transactions, setTransactions] = useState(tx);
 
   const sortByDate = () => {
     const dateSorted = [...transactions].sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -10,7 +9,7 @@ export function TransactionsIndex({transactions, categories, setCategories, tags
   }
 
   const addCategory = async () => {
-    const userInput = prompt("Please enter your input:", "enter a new category name");
+    const userInput = prompt("Please enter a new category name:", "category name");
     if (userInput !== null) {
       const params = new FormData();
       params.append('name', userInput);
@@ -22,6 +21,25 @@ export function TransactionsIndex({transactions, categories, setCategories, tags
         setCategories(getResponse.data);
 
         return newCategory.id;
+      } catch (error) {
+        console.error("Error adding category:", error);
+        return null;
+      }
+    } else {
+      console.log("User cancelled the prompt.");
+      return null;
+    }
+  }
+
+  const addTag = async (tx) => {
+    const userInput = prompt("Please enter a new tag name for " + tx.category.name + ":", "tag name", tx.category.name);
+    if (userInput !== null) {
+      const params = new FormData();
+      params.append('name', userInput);
+      params.append('category_id', tx.category_id)
+      try {
+        const postResponse = await axios.post('http://localhost:5000/tags', params);
+        return postResponse.data.id;
       } catch (error) {
         console.error("Error adding category:", error);
         return null;
@@ -58,14 +76,23 @@ export function TransactionsIndex({transactions, categories, setCategories, tags
     })
     
   }
-  const handleTagSelect = (event, txId) => {
+  const handleTagSelect = async (event, tx) => {
     event.preventDefault();
     const params = new FormData();
-    params.append("tag", event.target.value);
-    axios.patch(`http://localhost:5000/transactions/${txId}`, params).then(response => {
+    let selection = event.target.value;
+    if (selection === 'addTag') {
+      selection = await addTag(tx);
+      if (!selection) {
+        event.target.value = "";
+        return
+      }
+    }
+    params.append("tag", selection);
+    axios.patch(`http://localhost:5000/transactions/${tx.id}`, params).then(response => {
+      
       console.log(response.data);
       setTransactions(transactions.map(t => {
-        return (t.id === txId)
+        return (t.id === tx.id)
           ? {
               ...t,
               tag_id: response.data.tag_id,
@@ -73,6 +100,15 @@ export function TransactionsIndex({transactions, categories, setCategories, tags
             }
           : t;
       }));
+      // setCategories(categories.map(cat => {
+      //   return (cat.id === tx.category_id)
+      //   ? {
+      //     ...cat,
+      //     tags: [...cat.tags, response.data.tag]
+      //   }
+      //   :
+      //   cat
+      // }));
     })
   }
 
@@ -101,44 +137,33 @@ export function TransactionsIndex({transactions, categories, setCategories, tags
                 <option key={category.id} value={category.id}>{category.name}</option>
               ))}
               <option value="addCategory">+ add a Category</option>
-
             </select>
         </div>
-
-        // use below for updating both category and tag later, maybe in a modal
-
-        // <div style={{ display:"inline"}}>
-        //   <form onSubmit={handleSelect} action="" style={{  width:"fit-content", display:"inline"}}>
-        //     <label htmlFor="categories"></label>
-        //     <select name="categories" >
-        //       {categories.map(category => (
-        //         <option key={category.id} value={category.name}>{category.name}</option>
-        //       ))}
-        //     </select>
-        //     &nbsp;
-        //   </form>
-        //   {/* <input type="submit" value="select"/> */}
-        // </div>
         )
       }
       {t.tag ? 
         <span style={{display: "inline-block", width:"150px"}}>{t.tag.name}</span>
         :
         (t.category?
-          <div style={{display: "inline-block"}}>
-            <select onChange={(event) => handleTagSelect(event, t.id)} >
+          <div style={{display: "inline-block", width:"150px"}}>
+            <select onChange={(event) => handleTagSelect(event, t)} >
             <option></option>
               {t.category.tags.map(tag => (
                 <option key={tag.id} value={tag.id}>{tag.name}</option>
               ))}
+              <option value="addTag">+ add a Tag</option>
             </select>
         </div>:null
         )
       }
-      {(t.category && t.tag)?
-<button onClick={() => onEdit(t)}>edit</button>
-      :
-null
+      {t.category?
+        <button onClick={() => {
+          const latestTx = transactions.find(tr => tr.id === t.id);
+          onEdit(latestTx);
+        }}>edit</button>
+      
+        :
+        null
       }
     </div>
   )
