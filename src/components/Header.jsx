@@ -3,7 +3,7 @@ export function Header() {
   return (
     <header>
       <nav>
-        <Link to="/">Home</Link> | <a href="#">Link</a>
+        <Link to="/">Home</Link> | <Link to="/transactions">Transactions</Link> | <Link to="/categories">Categories</Link>
       </nav>
     </header>
   )

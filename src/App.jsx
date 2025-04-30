@@ -2,6 +2,7 @@ import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import { Header } from "./components/Header";
 import { Home } from "./components/Home";
 import { TransactionsPage } from "./components/TransactionsPage";
+import { CategoriesPage } from "./components/CategoriesPage";
 import { Footer } from "./components/Footer";
 import axios from 'axios'
 
@@ -29,6 +30,11 @@ const router = createBrowserRouter([
           ]);
           return { transactions: transaction.data, cat: category.data};
         }
+      },
+      {
+        path: "/categories",
+        element: <CategoriesPage />,
+        loader: () => axios.get("http://localhost:5000/categories").then(response => response.data)
       }
     ]
   }
