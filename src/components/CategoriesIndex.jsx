@@ -123,8 +123,14 @@ export function CategoriesIndex({categories, setCategories }) {
   // useEffect(sortByDate, []);
 
   const CategoryItem = ({cat}) => (
-    <div>
-      <span>{cat.name}</span>
+    <div style={{border:"1px solid gray", padding:"12px", borderRadius:"5px", boxShadow:"gray 2px 2px", position:"relative"}}>
+      <h2>{cat.name}</h2>
+      {cat.tags.map(tag => (
+        <ul key={tag.id}>
+          <li>{tag.name}</li>
+        </ul>
+      ))}
+      <button style={{position:"absolute", right:"20px"}}>edit</button>
     </div>
   )
 
@@ -139,7 +145,7 @@ export function CategoriesIndex({categories, setCategories }) {
         <span style={{display: "inline-block", width:"150px"}}>category</span>
         <span style={{display: "inline-block", width:"100px"}}>tag</span>
       </div> */}
-      <div style={{width:"fit-content"}}>
+      <div style={{display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:"12px"}}>
         {categories.map(cat => (
           <CategoryItem key={cat.id} cat={cat} />
         ))}

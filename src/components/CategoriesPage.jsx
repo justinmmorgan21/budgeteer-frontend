@@ -29,7 +29,7 @@ export function CategoriesPage() {
   // }
 
   return (
-    <main>
+    <main style={{width:"75%", margin:"20px auto"}}>
       <CategoriesIndex categories={categories} setCategories={setCategories} /> 
       {/* onEdit={handleTxEdit} setTxInPage={setTxInPage}/> */}
       <Modal onClose={handleClose} show={modalVisible}>
