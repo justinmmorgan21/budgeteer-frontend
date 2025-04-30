@@ -5,7 +5,7 @@ import { Modal } from "./Modal";
 import { TransactionEdit } from "./TransactionEdit";
 
 export function TransactionsPage() {
-  const { transactions: loadedTransactions, cat, tags } = useLoaderData();
+  const { transactions: loadedTransactions, cat } = useLoaderData();
   const [ transactions, setTransactions ] = useState(loadedTransactions);
   const [ categories, setCategories ] = useState(cat);
   const [ modalVisible, setModalVisible ] = useState(false);
@@ -16,7 +16,6 @@ export function TransactionsPage() {
   }
 
   const handleTxEdit = (tx) => {
-    console.log("on edit: ", tx);
     setModalVisible(true);
     setCurrentTx(tx);
   }
@@ -28,14 +27,13 @@ export function TransactionsPage() {
   }
 
   const setTxInPage = async (data) => {
-    console.log("data: ", data);
     setTransactions(data);
     
   }
 
   return (
     <main>
-      <TransactionsIndex transactions={transactions} categories={categories} setCategories={setCategories} tags={tags} onEdit={handleTxEdit} setTransactions={setTransactions} setTxInPage={setTxInPage}/>
+      <TransactionsIndex transactions={transactions} categories={categories} setCategories={setCategories} onEdit={handleTxEdit} setTransactions={setTransactions} setTxInPage={setTxInPage}/>
       <Modal onClose={handleClose} show={modalVisible}>
         <TransactionEdit onClose={handleClose} tx={currentTx} categories={categories} setCategories={setCategories} onUpdate={onUpdate}/>
       </Modal>

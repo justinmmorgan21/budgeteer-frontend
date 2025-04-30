@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import axios from 'axios';
 
-export function TransactionsIndex({transactions, categories, setCategories, tags, onEdit, setTransactions}) {
+export function TransactionsIndex({transactions, categories, setCategories, onEdit, setTransactions}) {
 
   const sortByDate = () => {
     const dateSorted = [...transactions].sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -63,7 +63,6 @@ export function TransactionsIndex({transactions, categories, setCategories, tags
     }
     params.append("category", selection);
     axios.patch(`http://localhost:5000/transactions/${txId}`, params).then(response => {
-      console.log(response.data);
       setTransactions(transactions.map(t => {
         return (t.id === txId)  
         ? {
@@ -89,8 +88,6 @@ export function TransactionsIndex({transactions, categories, setCategories, tags
     }
     params.append("tag", selection);
     axios.patch(`http://localhost:5000/transactions/${tx.id}`, params).then(response => {
-      
-      console.log(response.data);
       setTransactions(transactions.map(t => {
         return (t.id === tx.id)
           ? {
@@ -100,6 +97,10 @@ export function TransactionsIndex({transactions, categories, setCategories, tags
             }
           : t;
       }));
+
+      // Can't get a new tag to associate with the category so that when the edit button is chosen,
+      // the tag reflects the new tag created above. Below was an attempt but did not work.
+
       // setCategories(categories.map(cat => {
       //   return (cat.id === tx.category_id)
       //   ? {
