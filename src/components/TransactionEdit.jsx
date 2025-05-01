@@ -38,7 +38,7 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
   }
 
   const addTag = async () => {
-    const userInput = prompt("Please enter a new tag name for " + tx.category.name + ":", "tag name", tx.category.name);
+    const userInput = prompt("Please enter a new tag name for " + tx.category.name + ":", "tag name");
     if (userInput !== null) {
       const params = new FormData();
       params.append('name', userInput);

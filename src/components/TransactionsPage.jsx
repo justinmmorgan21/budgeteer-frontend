@@ -1,8 +1,8 @@
 import { TransactionsIndex } from "./TransactionsIndex";
+import { TransactionEdit } from "./TransactionEdit";
 import { useLoaderData } from "react-router-dom";
 import { useState } from 'react';
 import { Modal } from "./Modal";
-import { TransactionEdit } from "./TransactionEdit";
 
 export function TransactionsPage() {
   const { transactions: loadedTransactions, cat } = useLoaderData();
