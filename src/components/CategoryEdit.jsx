@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { IoCloseOutline } from "react-icons/io5";
 export function CategoryEdit( { onClose, cat, onUpdate } ) {
   const navigate = useNavigate();
   const originalCatName = cat.name;
@@ -57,6 +57,15 @@ export function CategoryEdit( { onClose, cat, onUpdate } ) {
     }));
   }
 
+  const deleteTag = async (event, tag) => {
+    await axios.delete(`http://localhost:5000/tags/${tag.id}`)
+      // console.log("response: ", response.data)
+    const getResponse = await axios.get('http://localhost:5000/categories');
+    const updatedTags = getResponse.data.find(category=>category.id == cat.id).tags
+    setTags(updatedTags);
+    setInputTags(updatedTags);
+  }
+
   return (
       <div >
         <form onSubmit={handleSubmit} style={{width:"100%", display:"flex", flexDirection:"column"}}>
@@ -70,6 +79,9 @@ export function CategoryEdit( { onClose, cat, onUpdate } ) {
             <div key={tag.id} style={{marginBottom:"6px"}}>
               <label htmlFor={tag.name}></label>
               <input type="text" id={tag.name} name={tag.id} value={tag.name} onChange={(event)=>updateInputTag(event, tag)}/>
+              <a style={{margin:"auto 0px", display:"inline", cursor:"pointer"}} onClick={(e)=>deleteTag(e, tag)}>
+                <IoCloseOutline />
+              </a>
             </div>
           ))}
           <br />
