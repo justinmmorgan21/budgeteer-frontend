@@ -139,14 +139,6 @@ export function CategoriesIndex({categories, onEdit }) {
   return (
     <div>
       <h1>All categories</h1>
-      {/* <div style={{ padding:"6px"}}>
-        <span style={{display: "inline-block", width:"140px"}}>type</span>
-        <span style={{display: "inline-block", width:"150px"}}>date</span>
-        <span style={{display: "inline-block", width:"100px"}}>amount</span>
-        <span style={{display: "inline-block", width:"600px"}}>payee</span>
-        <span style={{display: "inline-block", width:"150px"}}>category</span>
-        <span style={{display: "inline-block", width:"100px"}}>tag</span>
-      </div> */}
       <div style={{display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:"12px"}}>
         {categories.map(cat => (
           <CategoryItem key={cat.id} cat={cat} />
