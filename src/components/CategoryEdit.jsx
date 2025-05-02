@@ -1,32 +1,14 @@
 import axios from "axios";
-// import { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export function CategoryEdit( { onClose, cat, onUpdate } ) {
   // const [category, setCategory] = useState(tx.category);
   const navigate = useNavigate();
-
-  // const addCategory = async () => {
-  //   const userInput = prompt("Please enter a new category name:", "category name");
-  //   if (userInput !== null) {
-  //     const params = new FormData();
-  //     params.append('name', userInput);
-  //     try {
-  //       const postResponse = await axios.post('http://localhost:5000/categories', params);
-  //       const newCategory = postResponse.data;
-  
-  //       const getResponse = await axios.get('http://localhost:5000/categories');
-  //       setCategories(getResponse.data);
-  //       return newCategory;
-  //     } catch (error) {
-  //       console.error("Error adding category:", error);
-  //       return null;
-  //     }
-  //   } else {
-  //     console.log("User cancelled the prompt.");
-  //     return null;
-  //   }
-  // }
+  const originalCatName = cat.name;
+  const [ tags, setTags ] = useState(cat.tags);
+  const [ catName, setCatName ] = useState(cat.name);
+  const [ inputTags, setInputTags ] = useState(cat.tags);
 
   const addTag = async () => {
     const userInput = prompt("Please enter a new tag name for " + cat.name + ":", "tag name");
@@ -52,14 +34,39 @@ export function CategoryEdit( { onClose, cat, onUpdate } ) {
     }
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
+    console.log("submit");
     event.preventDefault();
     const params = new FormData(event.target);
-    axios.patch(`http://localhost:5000/categories/${cat.id}`, params).then(response => {
-      onUpdate(response.data);
-      onClose();
-      navigate(`/transactions`);
-    })
+    if (params.get("catName") !== originalCatName) {
+      params.forEach((v,k) => console.log(k + ": " + v));
+      const catUpdate = await axios.patch(`http://localhost:5000/categories/${cat.id}`, params)
+      console.log(catUpdate.data);
+    }
+    const updatedTags = await Promise.all(
+      tags.map(async (tag) => {
+        if (params.has(tag.id) && params.get(tag.id) !== tag.name) {
+          const tagUpdate = await axios.patch(`http://localhost:5000/tags/${tag.id}`, params)
+          return { ...tag, name: tagUpdate.data.name };
+        }
+        return tag;
+      })
+    );
+    onUpdate(catName, updatedTags);
+    onClose();
+    navigate(`/categories`);
+  }
+
+  const updateInputTag = (event, tag) => {
+    setInputTags(inputTags.map(t => {
+      return (t.id === tag.id) ?
+        {
+          ...t,
+          name: event.target.value
+        }
+        :
+        t;
+    }));
   }
 
   return (
@@ -67,40 +74,26 @@ export function CategoryEdit( { onClose, cat, onUpdate } ) {
         <form onSubmit={handleSubmit} style={{width:"100%", display:"flex", flexDirection:"column"}}>
           <div>
 
-          <label>Category: </label>
-          <input type="text" defaultValue={cat.name}/>
+          <label htmlFor="catName">Category: </label>
+          <input type="text" id="catName" name="catName" value={catName} onChange={(e) => setCatName(e.target.value)}/>
           </div>
           <br />
-          {/* <label htmlFor="categories"></label>
-          <select onChange={async (e)=>{
-            if (e.target.value === "addCategory") {
-              const newCategory = await addCategory();
-              if (newCategory) {
-                setCategory(newCategory);
-              }
-            } else {
-              setCategory(categories.find(cat=>cat.id == e.target.value))
-            }
-          }} value={category.id} name="category">
-            {categories?.map(category => (
-              <option key={category.id} value={category.id}>{category.name}</option>
-            ))}
-            <option value="addCategory">+ add a Category</option>
-          </select> */}
           <span>Tags:</span>
-          <label htmlFor="tags"></label>
           {/* <select onChange={async (e)=>{
             if (e.target.value === "addTag") {
               const newTag = await addTag();
               if (newTag) {
                 setTag(newTag)
+                }
+                } else {
+                  setTag(e.target.value)
               }
-            } else {
-              setTag(e.target.value)
-            }
-          }} value={tag?.id} name="tag"> */}
-            {cat.tags.map(tag => (
-                <input key={tag.id} type="text" defaultValue={tag.name}/>
+              }} value={tag?.id} name="tag"> */}
+            {inputTags.map(tag => (
+                <div key={tag.id}>
+                  <label htmlFor={tag.name}></label>
+                  <input type="text" id={tag.name} name={tag.id} value={tag.name} onChange={(event)=>updateInputTag(event, tag)}/>
+                </div>
             ))}
             <br />
             <button onClick={()=>addTag()} value="addTag">+ add a Tag</button>

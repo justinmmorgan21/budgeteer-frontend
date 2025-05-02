@@ -19,16 +19,19 @@ export function CategoriesPage() {
     setCurrentCat(cat);
   }
 
-  const onUpdate = newCat => {
+  const onUpdate = (catName, newTags) => {
     setCategories(prev => 
-      prev.map(cat => cat.id === newCat.id ? newCat : cat)
-    )
+      prev.map(cat => {
+        return cat.id === currentCat.id ? 
+        {
+          ...cat,
+          name: catName,
+          tags: newTags
+        }
+        : 
+        cat
+    }))
   }
-
-  // const setTxInPage = async (data) => {
-  //   setTransactions(data);
-    
-  // }
 
   return (
     <main style={{width:"75%", margin:"20px auto"}}>

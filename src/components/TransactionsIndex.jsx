@@ -73,7 +73,6 @@ export function TransactionsIndex({transactions, categories, setCategories, onEd
         : t;
       }));
     })
-    
   }
   const handleTagSelect = async (event, tx) => {
     event.preventDefault();
