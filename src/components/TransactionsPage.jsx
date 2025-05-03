@@ -32,7 +32,7 @@ export function TransactionsPage() {
   }
 
   return (
-    <main >
+    <main style={{width:"80%", margin:"20px auto"}}>
       <TransactionsIndex transactions={transactions} categories={categories} setCategories={setCategories} onEdit={handleTxEdit} setTransactions={setTransactions} setTxInPage={setTxInPage}/>
       <Modal onClose={handleClose} show={modalVisible}>
         <TransactionEdit onClose={handleClose} tx={currentTx} categories={categories} setCategories={setCategories} onUpdate={onUpdate}/>

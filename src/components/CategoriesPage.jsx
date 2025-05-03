@@ -34,7 +34,7 @@ export function CategoriesPage() {
   }
 
   return (
-    <main style={{width:"75%", margin:"20px auto"}}>
+    <main style={{width:"80%", margin:"20px auto"}}>
       <CategoriesIndex categories={categories} setCategories={setCategories} onEdit={handleCatEdit}/>
       <Modal onClose={handleClose} show={modalVisible}>
         <CategoryEdit onClose={handleClose} cat={currentCat} onUpdate={onUpdate}/>

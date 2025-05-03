@@ -21,6 +21,7 @@ export function CategoryEdit( { onClose, cat, onUpdate } ) {
         const updatedTags = getResponse.data.find(category=>category.id == cat.id).tags
         setTags(updatedTags);
         setInputTags(updatedTags);
+        onUpdate(cat.name, updatedTags);
       } catch (error) {
         console.error("Error adding category:", error);
         return null;
@@ -52,46 +53,46 @@ export function CategoryEdit( { onClose, cat, onUpdate } ) {
   }
 
   const updateInputTag = (event, tag) => {
-    setInputTags(inputTags.map(t => {
-      t.id === tag.id ? { ...t, name: event.target.value } : t;
-    }));
+    setInputTags(inputTags.map(t =>
+      t.id === tag.id ? { ...t, name: event.target.value } : t
+    ));
   }
 
   const deleteTag = async (event, tag) => {
     await axios.delete(`http://localhost:5000/tags/${tag.id}`)
-      // console.log("response: ", response.data)
     const getResponse = await axios.get('http://localhost:5000/categories');
     const updatedTags = getResponse.data.find(category=>category.id == cat.id).tags
     setTags(updatedTags);
     setInputTags(updatedTags);
+    onUpdate(cat.name, updatedTags);
   }
 
   return (
-      <div >
-        <form onSubmit={handleSubmit} style={{width:"100%", display:"flex", flexDirection:"column"}}>
-          <div>
-            <label htmlFor="catName">Category: </label>
-            <input type="text" id="catName" name="catName" value={catName} onChange={(e) => setCatName(e.target.value)}/>
+    <div >
+      <form onSubmit={handleSubmit} style={{width:"100%", display:"flex", flexDirection:"column"}}>
+        <div>
+          <label htmlFor="catName">Category: </label>
+          <input type="text" id="catName" name="catName" value={catName} onChange={(e) => setCatName(e.target.value)}/>
+        </div>
+        <br />
+        <span style={{marginBottom:"6px"}}>Tags:</span>
+        {inputTags.map(tag => (
+          <div key={tag.id} style={{marginBottom:"6px"}}>
+            <label htmlFor={tag.name}></label>
+            <input type="text"  name={tag.id} value={tag.name} onChange={(event)=>updateInputTag(event, tag)}/>
+            <a style={{margin:"auto 0px", display:"inline", cursor:"pointer"}} onClick={(e)=>deleteTag(e, tag)}>
+              <IoCloseOutline />
+            </a>
           </div>
-          <br />
-          <span style={{marginBottom:"6px"}}>Tags:</span>
-          {inputTags.map(tag => (
-            <div key={tag.id} style={{marginBottom:"6px"}}>
-              <label htmlFor={tag.name}></label>
-              <input type="text" id={tag.name} name={tag.id} value={tag.name} onChange={(event)=>updateInputTag(event, tag)}/>
-              <a style={{margin:"auto 0px", display:"inline", cursor:"pointer"}} onClick={(e)=>deleteTag(e, tag)}>
-                <IoCloseOutline />
-              </a>
-            </div>
-          ))}
-          <br />
-          <button onClick={(e)=>{e.preventDefault(); addTag();}} value="addTag">+ add a Tag</button>
-          <br />
-          <div>
-            <input type="submit" value="update"/>
-            <button onClick={onClose}>cancel</button>
-          </div>
-        </form>
-      </div>
+        ))}
+        <br />
+        <button onClick={(e)=>{e.preventDefault(); addTag();}} value="addTag">+ add a Tag</button>
+        <br />
+        <div>
+          <input type="submit" value="update"/>
+          <button onClick={onClose}>cancel</button>
+        </div>
+      </form>
+    </div>
   );
 }

@@ -121,9 +121,9 @@ export function TransactionsIndex({transactions, categories, setCategories, onEd
   }
 
   const TransactionItem = ({ t }) => (
-    <div style={{border:"solid black 1px", padding:"10px"}}>
+    <div style={{border:"solid black 1px", padding:"10px", marginBottom:"8px", borderRadius:"5px"}}>
       <span style={{display: "inline-block", width:"140px"}}>{t.type}</span>
-      <span style={{display: "inline-block", width:"150px"}}> {formatDate(t.date)}</span>
+      <span style={{display: "inline-block", width:"130px"}}> {formatDate(t.date)}</span>
       <span style={{display: "inline-block", width:"100px"}}> {t.type==='DEPOSIT' ? `($${t.amount})` : `$${t.amount}`}</span>
       <span style={{display: "inline-block", width:"600px"}}> {t.payee}</span>
       {t.category ? 
@@ -173,9 +173,9 @@ export function TransactionsIndex({transactions, categories, setCategories, onEd
   return (
     <div>
       <h1>All transactions</h1>
-      <div style={{ padding:"6px"}}>
+      <div style={{ padding:"6px", fontWeight:"bold"}}>
         <span style={{display: "inline-block", width:"140px"}}>type</span>
-        <span style={{display: "inline-block", width:"150px"}}>date</span>
+        <span style={{display: "inline-block", width:"130px"}}>date</span>
         <span style={{display: "inline-block", width:"100px"}}>amount</span>
         <span style={{display: "inline-block", width:"600px"}}>payee</span>
         <span style={{display: "inline-block", width:"150px"}}>category</span>
