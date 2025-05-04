@@ -172,7 +172,6 @@ export function TransactionsIndex({transactions, categories, setCategories, onEd
 
   return (
     <div>
-      <h1>All transactions</h1>
       <div style={{ padding:"6px", fontWeight:"bold"}}>
         <span style={{display: "inline-block", width:"140px"}}>type</span>
         <span style={{display: "inline-block", width:"130px"}}>date</span>
