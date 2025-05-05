@@ -1,12 +1,6 @@
-import { useEffect } from "react";
 import axios from 'axios';
 
 export function TransactionsIndex({transactions, categories, setCategories, onEdit, setTransactions}) {
-
-  const sortByDate = () => {
-    const dateSorted = [...transactions].sort((a, b) => new Date(a.date) - new Date(b.date));
-    setTransactions(dateSorted);
-  }
 
   const addCategory = async () => {
     const userInput = prompt("Please enter a new category name:", "category name");
@@ -167,8 +161,6 @@ export function TransactionsIndex({transactions, categories, setCategories, onEd
       }
     </div>
   )
-
-  useEffect(sortByDate, []);
 
   return (
     <div>

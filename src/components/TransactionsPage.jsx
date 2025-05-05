@@ -1,17 +1,19 @@
 import { TransactionsIndex } from "./TransactionsIndex";
 import { TransactionEdit } from "./TransactionEdit";
 import { useLoaderData } from "react-router-dom";
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Modal } from "./Modal";
 import axios from 'axios';
 
 export function TransactionsPage() {
   const { transactions: loadedTransactions, cat } = useLoaderData();
   const [ transactions, setTransactions ] = useState(loadedTransactions);
-  const sortedTransactions = [...transactions].sort((a, b) => new Date(a.date) - new Date(b.date));
   const [ categories, setCategories ] = useState(cat);
   const [ modalVisible, setModalVisible ] = useState(false);
   const [ currentTx, setCurrentTx ] = useState(null);
+  const fileInputRef = useRef(null);
+  // const [currentPage, setCurrentPage] = useState(1);
+  // const [totalPages, setTotalPages] = useState(1);
 
   const handleClose = () => {
     setModalVisible(false);
@@ -34,11 +36,15 @@ export function TransactionsPage() {
   }
 
   const fileUpload = (event) => {
+    event.preventDefault();
     const params = new FormData(event.target);
-    axios.post("http://localhost:5000/transactions/upload", params).then(response => {
-      console.log(response.data);
-      const newTransactions = response.data;
-      setTransactions(prev => [...prev, ...newTransactions]);
+    axios.post("http://localhost:5000/transactions/upload", params).then(() => {
+      axios.get("http://localhost:5000/transactions").then(response => {
+        console.log("response: ", response.data);
+        const newTransactions = response.data;
+        setTransactions(newTransactions);
+        fileInputRef.current.value = null;
+      })
     })
   }
 
@@ -49,14 +55,13 @@ export function TransactionsPage() {
         <form style={{border:"1px solid black", padding:"12px", borderRadius:"5px"}} onSubmit={(event)=>fileUpload(event)}>
           <div style={{display:'flex', flexDirection:"column", gap:"6px"}}>
             <label htmlFor="file">Upload Statement:</label>
-            <input type="file" id="file" name="file" style={{height:"fit-content"}} />
+            <input type="file" id="file" name="file" ref={fileInputRef} style={{height:"fit-content"}} />
             <input type="submit" />
           </div>
         </form>
       </div>
       <br />
-      {/* <TransactionsIndex transactions={sortedTransactions} ... /> */}
-      <TransactionsIndex transactions={sortedTransactions} categories={categories} setCategories={setCategories} onEdit={handleTxEdit} setTransactions={setTransactions} setTxInPage={setTxInPage}/>
+      <TransactionsIndex transactions={transactions} categories={categories} setCategories={setCategories} onEdit={handleTxEdit} setTransactions={setTransactions} setTxInPage={setTxInPage}/>
       <Modal onClose={handleClose} show={modalVisible}>
         <TransactionEdit onClose={handleClose} tx={currentTx} categories={categories} setCategories={setCategories} onUpdate={onUpdate}/>
       </Modal>
