@@ -6,14 +6,16 @@ import { Modal } from "./Modal";
 import axios from 'axios';
 
 export function TransactionsPage() {
-  const { transactions: loadedTransactions, cat } = useLoaderData();
-  const [ transactions, setTransactions ] = useState(loadedTransactions);
+  const { transactionsData: loadedTransactionsData, cat } = useLoaderData();
+  const [ transactions, setTransactions ] = useState(loadedTransactionsData.transactions);
+  console.log("load tx: ", transactions);
   const [ categories, setCategories ] = useState(cat);
   const [ modalVisible, setModalVisible ] = useState(false);
   const [ currentTx, setCurrentTx ] = useState(null);
   const fileInputRef = useRef(null);
-  // const [currentPage, setCurrentPage] = useState(1);
-  // const [totalPages, setTotalPages] = useState(1);
+  const [ currentPage, setCurrentPage ] = useState(loadedTransactionsData.current_page);
+  console.log("load cP: ", currentPage);
+  const [ totalPages, setTotalPages ] = useState(loadedTransactionsData.total_pages);
 
   const handleClose = () => {
     setModalVisible(false);
@@ -39,14 +41,22 @@ export function TransactionsPage() {
     event.preventDefault();
     const params = new FormData(event.target);
     axios.post("http://localhost:5000/transactions/upload", params).then(() => {
-      axios.get("http://localhost:5000/transactions").then(response => {
+      axios.get(`http://localhost:5000/transactions?page=${currentPage}&per_page=${25}`).then(response => {
         console.log("response: ", response.data);
-        const newTransactions = response.data;
-        setTransactions(newTransactions);
+        setTransactions(response.data);
         fileInputRef.current.value = null;
       })
     })
   }
+
+  const updatePagination = (newPageNum) => {
+    setCurrentPage(newPageNum);
+    axios.get(`http://localhost:5000/transactions?page=${newPageNum}&per_page=${25}`).then(response => {
+      console.log("response: ", response.data);
+      setTransactions(response.data.transactions);
+    })
+  }
+
 
   return (
     <main style={{width:"80%", margin:"20px auto"}}>
@@ -65,6 +75,11 @@ export function TransactionsPage() {
       <Modal onClose={handleClose} show={modalVisible}>
         <TransactionEdit onClose={handleClose} tx={currentTx} categories={categories} setCategories={setCategories} onUpdate={onUpdate}/>
       </Modal>
+      <div style={{width:"100%", display:"flex", justifyContent:"center", gap:"12px"}}>
+        {currentPage > 1 ? <span onClick={()=>updatePagination(currentPage - 1)} style={{cursor:"pointer"}}>{`<<`}</span> : null}
+        <span> Page {currentPage} </span>
+        {currentPage < totalPages ? <span onClick={()=>updatePagination(currentPage + 1)} style={{cursor:"pointer"}}>{`>>`}</span> : null}
+      </div>
     </main>
   );
 }
