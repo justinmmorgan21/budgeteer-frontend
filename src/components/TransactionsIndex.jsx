@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export function TransactionsIndex({transactions, categories, setCategories, onEdit, setTransactions}) {
-  console.log("index: ", transactions);
+
   const addCategory = async () => {
     const userInput = prompt("Please enter a new category name:", "category name");
     if (userInput !== null) {

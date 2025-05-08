@@ -23,7 +23,7 @@ export function CategoryEdit( { onClose, cat, onUpdate } ) {
         setInputTags(updatedTags);
         onUpdate(cat.name, updatedTags);
       } catch (error) {
-        console.error("Error adding category:", error);
+        console.error("Error adding tag:", error);
         return null;
       }
     } else {
@@ -59,9 +59,13 @@ export function CategoryEdit( { onClose, cat, onUpdate } ) {
   }
 
   const deleteTag = async (event, tag) => {
-    await axios.delete(`http://localhost:5000/tags/${tag.id}`)
+    const params = new FormData();
+    params.append("archive", true);
+    const patchResponse = await axios.patch(`http://localhost:5000/tags/${tag.id}`, params)
+    console.log("patchResponse: ", patchResponse);
     const getResponse = await axios.get('http://localhost:5000/categories');
-    const updatedTags = getResponse.data.find(category=>category.id == cat.id).tags
+    const updatedTags = getResponse.data.find(category=>category.id == cat.id).tags.filter(tag=>!tag.archived)
+    console.log(updatedTags);
     setTags(updatedTags);
     setInputTags(updatedTags);
     onUpdate(cat.name, updatedTags);

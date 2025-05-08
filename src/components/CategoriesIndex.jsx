@@ -138,7 +138,6 @@ export function CategoriesIndex({categories, onEdit }) {
 
   return (
     <div>
-      <h1>All categories</h1>
       <div style={{display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:"12px"}}>
         {categories.map(cat => (
           <CategoryItem key={cat.id} cat={cat} />
