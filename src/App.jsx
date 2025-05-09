@@ -3,6 +3,7 @@ import { Header } from "./components/Header";
 import { Home } from "./components/Home";
 import { TransactionsPage } from "./components/TransactionsPage";
 import { CategoriesPage } from "./components/CategoriesPage";
+import { ArchivedPage } from "./components/ArchivedPage";
 import { Footer } from "./components/Footer";
 import axios from 'axios'
 
@@ -11,7 +12,9 @@ const router = createBrowserRouter([
     element: (
       <div>
         <Header />
-        <Outlet />
+        <div style={{margin:"60px 0 90px 0"}}>
+          <Outlet />
+        </div>
         <Footer />
       </div>
     ),
@@ -35,6 +38,11 @@ const router = createBrowserRouter([
         path: "/categories",
         element: <CategoriesPage />,
         loader: () => axios.get("http://localhost:5000/categories").then(response => response.data)
+      },
+      {
+        path: "/archived",
+        element: <ArchivedPage />,
+        loader: () => axios.get("http://localhost:5000/archived").then(response => response.data)
       }
     ]
   }

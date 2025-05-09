@@ -1,6 +1,6 @@
 import { CategoriesIndex } from "./CategoriesIndex";
 import { CategoryEdit } from "./CategoryEdit";
-import { useLoaderData } from "react-router-dom";
+import { useLoaderData, useNavigate } from "react-router-dom";
 import { useState } from 'react';
 import { Modal } from "./Modal";
 import axios from 'axios';
@@ -10,6 +10,8 @@ export function CategoriesPage() {
   const [ categories, setCategories ] = useState(loadedCategories);
   const [ modalVisible, setModalVisible ] = useState(false);
   const [ currentCat, setCurrentCat ] = useState(null);
+
+  const navigate = useNavigate();
 
   const handleClose = () => {
     setModalVisible(false);
@@ -56,8 +58,11 @@ export function CategoriesPage() {
   return (
     <main style={{width:"80%", margin:"20px auto"}}>
       <div style={{display:"flex", height:"fit-content", alignItems:"center"}}>
-        <h1>All categories</h1>
-        <button onClick={()=>addCategory()} style={{height:"fit-content", marginLeft:"48px"}}>+ add a category</button>
+        <div style={{display:"flex", alignItems:"center", flex:"1 1 auto", gap:"48px"}}>
+          <h1>All categories</h1>
+          <button onClick={()=>addCategory()}>+ add a category</button>
+        </div>
+        <button onClick={()=>navigate('/archived')}>Archived</button>
       </div>
       <CategoriesIndex categories={categories} setCategories={setCategories} onEdit={handleCatEdit}/>
       <Modal onClose={handleClose} show={modalVisible}>
