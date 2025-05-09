@@ -64,14 +64,21 @@ export function ArchivedPage() {
         <div style={{width:"50%"}}>
           <h3>Categories</h3>
           {categories.map(cat => (
-            <div key={cat.id}>
+            <div key={cat.id} style={{border:"1px solid black", borderRadius:"5px", width:"50%", padding:"12px"}}>
               {cat.name}
+              <ul>
+                {cat.tags.map(tag => (
+                  <li key={tag.id}>
+                    {tag.name}
+                  </li>
+                ))}
+              </ul>
             </div>
           ))}
         </div>
         <div style={{width:"50%"}}>
           <h3>Tags</h3>
-          {tags.map(tag => (
+          {tags.filter(tag=>!tag.category.archived).map(tag => (
             <div key={tag.id}>
               {tag.name} (Category: {tag.category.name})
             </div>

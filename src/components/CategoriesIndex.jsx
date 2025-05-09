@@ -139,7 +139,7 @@ export function CategoriesIndex({categories, onEdit }) {
   return (
     <div>
       <div style={{display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:"12px"}}>
-        {categories.map(cat => (
+        {categories.filter(cat=>!cat.archived).map(cat => (
           <CategoryItem key={cat.id} cat={cat} />
         ))}
       </div>

@@ -71,6 +71,19 @@ export function CategoryEdit( { onClose, cat, onUpdate } ) {
     onUpdate(cat.name, updatedTags);
   }
 
+  const archive = () => {
+    const params = new FormData();
+    params.append("archive", true);
+    axios.patch(`http://localhost:5000/categories/${cat.id}`, params).then(response=> {
+      console.log(response.data);
+      tags.forEach(tag => {
+        axios.patch(`http://localhost:5000/tags/${tag.id}`, params).then(response=> {
+          console.log(response.data);
+        })
+      })
+    })
+  }
+
   return (
     <div >
       <form onSubmit={handleSubmit} style={{width:"100%", display:"flex", flexDirection:"column"}}>
@@ -80,7 +93,7 @@ export function CategoryEdit( { onClose, cat, onUpdate } ) {
         </div>
         <br />
         <span style={{marginBottom:"6px"}}>Tags:</span>
-        {inputTags.map(tag => (
+        {inputTags.filter(tag=>!tag.archived).map(tag => (
           <div key={tag.id} style={{marginBottom:"6px"}}>
             <label htmlFor={tag.name}></label>
             <input type="text"  name={tag.id} value={tag.name} onChange={(event)=>updateInputTag(event, tag)}/>
@@ -94,6 +107,7 @@ export function CategoryEdit( { onClose, cat, onUpdate } ) {
         <br />
         <div>
           <input type="submit" value="update"/>
+          <button onClick={()=>archive()}>archive</button>
           <button onClick={onClose}>cancel</button>
         </div>
       </form>
