@@ -22,14 +22,15 @@ export function CategoriesPage() {
     setCurrentCat(cat);
   }
 
-  const onUpdate = (catName, newTags) => {
+  const onUpdate = (catName, newTags, archivedUpdate) => {
     setCategories(prev => 
       prev.map(cat => {
         return cat.id === currentCat.id ? 
         {
           ...cat,
           name: catName,
-          tags: newTags
+          tags: newTags,
+          archived: archivedUpdate
         }
         : 
         cat
@@ -62,7 +63,7 @@ export function CategoriesPage() {
           <h1>All categories</h1>
           <button onClick={()=>addCategory()}>+ add a category</button>
         </div>
-        <button onClick={()=>navigate('/archived')}>Archived</button>
+        <button onClick={()=>navigate('/archived')}>Archived {'>>>'}</button>
       </div>
       <CategoriesIndex categories={categories} setCategories={setCategories} onEdit={handleCatEdit}/>
       <Modal onClose={handleClose} show={modalVisible}>

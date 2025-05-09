@@ -1,7 +1,7 @@
 import { TransactionsIndex } from "./TransactionsIndex";
 import { TransactionEdit } from "./TransactionEdit";
 import { useLoaderData } from "react-router-dom";
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Modal } from "./Modal";
 import axios from 'axios';
 

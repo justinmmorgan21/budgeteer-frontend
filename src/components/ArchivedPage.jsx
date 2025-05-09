@@ -1,6 +1,6 @@
 import { CategoriesIndex } from "./CategoriesIndex";
 import { CategoryEdit } from "./CategoryEdit";
-import { useLoaderData, useNavigate } from "react-router-dom";
+import { useLoaderData } from "react-router-dom";
 import { useState } from 'react';
 import { Modal } from "./Modal";
 import axios from 'axios';
@@ -10,52 +10,28 @@ export function ArchivedPage() {
   console.log("archived: ", archived);
   const [ categories, setCategories ] = useState(archived.categories);
   const [ tags, setTags ] = useState(archived.tags);
-  // const [ modalVisible, setModalVisible ] = useState(false);
-  // const [ currentCat, setCurrentCat ] = useState(null);
 
-  // const navigate = useNavigate();
+  const unarchiveCat = (cat) => {
+    const params = new FormData();
+    params.append("archive", false);
+    axios.patch(`http://localhost:5000/categories/${cat.id}`, params).then(response=> {
+      console.log(response.data);
+      setCategories(categories.filter(c => c.id != cat.id));
+      cat.tags.forEach(tag => {
+        axios.patch(`http://localhost:5000/tags/${tag.id}`, params).then(response=> {
+          console.log(response.data);
+        })
+      })
+    })
+  }
 
-  // const handleClose = () => {
-  //   setModalVisible(false);
-  // }
-
-  // const handleCatEdit = (cat) => {
-  //   setModalVisible(true);
-  //   setCurrentCat(cat);
-  // }
-
-  // const onUpdate = (catName, newTags) => {
-  //   setCategories(prev => 
-  //     prev.map(cat => {
-  //       return cat.id === currentCat.id ? 
-  //       {
-  //         ...cat,
-  //         name: catName,
-  //         tags: newTags
-  //       }
-  //       : 
-  //       cat
-  //   }))
-  // }
-
-  // const addCategory = async () => {
-  //   const userInput = prompt("Please enter a new category name:", "category name");
-  //   if (userInput !== null) {
-  //     const params = new FormData();
-  //     params.append('name', userInput);
-  //     try {
-  //       await axios.post('http://localhost:5000/categories', params);
-  //       const getResponse = await axios.get('http://localhost:5000/categories');
-  //       setCategories(getResponse.data);
-  //     } catch (error) {
-  //       console.error("Error adding category:", error);
-  //       return null;
-  //     }
-  //   } else {
-  //     console.log("User cancelled the prompt.");
-  //     return null;
-  //   }
-  // }
+  const unarchiveTag = (tag) => {
+    const params = new FormData();
+    params.append("archive", false);
+    axios.patch(`http://localhost:5000/tags/${tag.id}`, params).then(() => {
+      setTags(tags.filter(t => t.id != tag.id));
+    })
+  }
 
   return (
     <main style={{width:"80%", margin:"20px auto"}}>
@@ -65,7 +41,9 @@ export function ArchivedPage() {
           <h3>Categories</h3>
           {categories.map(cat => (
             <div key={cat.id} style={{border:"1px solid black", borderRadius:"5px", width:"50%", padding:"12px"}}>
-              {cat.name}
+              <div style={{display:"flex", justifyContent:"space-between"}}>
+                <span>{cat.name}</span> <button onClick={()=>unarchiveCat(cat)}>reactivate</button>
+              </div>
               <ul>
                 {cat.tags.map(tag => (
                   <li key={tag.id}>
@@ -73,6 +51,7 @@ export function ArchivedPage() {
                   </li>
                 ))}
               </ul>
+              
             </div>
           ))}
         </div>
@@ -80,22 +59,11 @@ export function ArchivedPage() {
           <h3>Tags</h3>
           {tags.filter(tag=>!tag.category.archived).map(tag => (
             <div key={tag.id}>
-              {tag.name} (Category: {tag.category.name})
+              <button onClick={()=>unarchiveTag(tag)}>reactivate</button> {tag.name} (Category: {tag.category.name})
             </div>
           ))}
         </div>
       </div>
-      {/* <div style={{display:"flex", height:"fit-content", alignItems:"center"}}>
-        <div style={{display:"flex", alignItems:"center", flex:"1 1 auto", gap:"48px"}}>
-          <h1>All categories</h1>
-          <button onClick={()=>addCategory()}>+ add a category</button>
-        </div>
-        <button onClick={()=>navigate('/archived')}>Archived</button>
-      </div>
-      <CategoriesIndex categories={categories} setCategories={setCategories} onEdit={handleCatEdit}/>
-      <Modal onClose={handleClose} show={modalVisible}>
-        <CategoryEdit onClose={handleClose} cat={currentCat} onUpdate={onUpdate}/>
-      </Modal> */}
     </main>
   );
 }

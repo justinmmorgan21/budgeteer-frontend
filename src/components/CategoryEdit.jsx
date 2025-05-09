@@ -68,7 +68,7 @@ export function CategoryEdit( { onClose, cat, onUpdate } ) {
     console.log(updatedTags);
     setTags(updatedTags);
     setInputTags(updatedTags);
-    onUpdate(cat.name, updatedTags);
+    onUpdate(cat.name, updatedTags, false);
   }
 
   const archive = () => {
@@ -76,6 +76,7 @@ export function CategoryEdit( { onClose, cat, onUpdate } ) {
     params.append("archive", true);
     axios.patch(`http://localhost:5000/categories/${cat.id}`, params).then(response=> {
       console.log(response.data);
+      onUpdate(cat.name, cat.tags, true);
       tags.forEach(tag => {
         axios.patch(`http://localhost:5000/tags/${tag.id}`, params).then(response=> {
           console.log(response.data);
