@@ -7,19 +7,16 @@ import axios from 'axios';
 
 export function ArchivedPage() {
   const archived = useLoaderData();
-  console.log("archived: ", archived);
   const [ categories, setCategories ] = useState(archived.categories);
   const [ tags, setTags ] = useState(archived.tags);
 
   const unarchiveCat = (cat) => {
     const params = new FormData();
     params.append("archive", false);
-    axios.patch(`http://localhost:5000/categories/${cat.id}`, params).then(response=> {
-      console.log(response.data);
+    axios.patch(`http://localhost:5000/categories/${cat.id}`, params).then(()=> {
       setCategories(categories.filter(c => c.id != cat.id));
       cat.tags.forEach(tag => {
-        axios.patch(`http://localhost:5000/tags/${tag.id}`, params).then(response=> {
-          console.log(response.data);
+        axios.patch(`http://localhost:5000/tags/${tag.id}`, params).then(()=> {
         })
       })
     })

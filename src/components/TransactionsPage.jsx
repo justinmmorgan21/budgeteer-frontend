@@ -1,7 +1,7 @@
 import { TransactionsIndex } from "./TransactionsIndex";
 import { TransactionEdit } from "./TransactionEdit";
 import { useLoaderData } from "react-router-dom";
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Modal } from "./Modal";
 import axios from 'axios';
 
@@ -14,6 +14,8 @@ export function TransactionsPage() {
   const fileInputRef = useRef(null);
   const [ currentPage, setCurrentPage ] = useState(loadedTransactionsData.current_page);
   const [ totalPages, setTotalPages ] = useState(loadedTransactionsData.total_pages);
+  const [updatedCategory, setUpdatedCategory] = useState(null);
+  const [updatedTransaction, setUpdatedTransaction] = useState(null);
   // const [ scrollPosition, setScrollPosition ] = useState(0);
 
   const handleClose = () => {
@@ -73,6 +75,25 @@ export function TransactionsPage() {
   //   window.scrollTo(0, scrollPosition);
   // }, [scrollPosition]);
 
+  useEffect(() => {
+    if (updatedCategory) {
+      setTransactions(prev => prev.map(tx =>
+        tx.category.id === updatedCategory.id ?
+          { ...tx, category: updatedCategory } : tx
+        )
+      );
+    }
+  }, [updatedCategory]);
+
+  useEffect(() => {
+    if (updatedTransaction) {
+      setTransactions(prev => prev.map(tx =>
+        tx.id == updatedTransaction.id ?
+          updatedTransaction : tx
+      ))
+    }
+  }, [updatedTransaction])
+
   return (
     <main style={{width:"80%", margin:"20px auto"}}>
       <div style={{display:"flex", alignItems:"center", justifyContent:"space-between"}}>
@@ -86,9 +107,11 @@ export function TransactionsPage() {
         </form>
       </div>
       <br />
-      <TransactionsIndex transactions={transactions} categories={categories} setCategories={setCategories} onEdit={handleTxEdit} setTransactions={setTransactions} setTxInPage={setTxInPage}/>
+      <TransactionsIndex transactions={transactions} categories={categories} setCategories={setCategories} onEdit={handleTxEdit} 
+                          setTransactions={setTransactions} setTxInPage={setTxInPage}/>
       <Modal onClose={handleClose} show={modalVisible}>
-        <TransactionEdit onClose={handleClose} tx={currentTx} categories={categories} setCategories={setCategories} onUpdate={onUpdate}/>
+        <TransactionEdit onClose={handleClose} tx={currentTx} categories={categories} setCategories={setCategories} onUpdate={onUpdate} 
+                          setUpdatedCategory={setUpdatedCategory} setUpdatedTransaction={setUpdatedTransaction}/>
       </Modal>
       <div style={{width:"100%", display:"flex", justifyContent:"center", gap:"12px"}}>
         {currentPage > 1 ? <span onClick={()=>updatePagination(currentPage - 1)} style={{cursor:"pointer", textDecoration:"underline"}}>{`<<`}</span> : null}

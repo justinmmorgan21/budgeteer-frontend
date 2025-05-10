@@ -2,7 +2,7 @@ import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-export function TransactionEdit( { onClose, tx, categories, setCategories, onUpdate } ) {
+export function TransactionEdit( { onClose, tx, categories, setCategories, onUpdate, setUpdatedCategory, setUpdatedTransaction } ) {
   const [category, setCategory] = useState(tx.category);
   const [tag, setTag] = useState(tx.tag);
   const navigate = useNavigate();
@@ -48,7 +48,10 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
         const newTag = postResponse.data;
 
         const getResponse = await axios.get('http://localhost:5000/categories');
-        setCategory(getResponse.data.find(cat=>cat.id == category.id))
+        setCategory(getResponse.data.find(cat=>cat.id == category.id));
+
+        const newCategory = getResponse.data;
+        setUpdatedCategory(newCategory.find(cat=>cat.id == category.id));
 
         return newTag;
       } catch (error) {
@@ -68,6 +71,17 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
       onUpdate(response.data);
       onClose();
       navigate(`/transactions`);
+    })
+  }
+
+  const reset = () => {
+    const params = new FormData();
+    params.append('category_id', '');
+    params.append('tag_id', '');
+    axios.patch(`http://localhost:5000/transactions/${tx.id}`, params).then(response => {
+      setUpdatedTransaction(response.data);
+      onClose();
+      navigate('/transactions');
     })
   }
 
@@ -93,7 +107,7 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
             } else {
               setCategory(categories.find(cat=>cat.id == e.target.value))
             }
-          }} value={category.id} name="category">
+          }} value={category.id} name="category_id">
             {categories?.map(category => (
               <option key={category.id} value={category.id}>{category.name}</option>
             ))}
@@ -109,13 +123,14 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
             } else {
               setTag(e.target.value)
             }
-          }} value={tag?.id} name="tag">
+          }} value={tag?.id} name="tag_id">
             {category.tags.map(tag => (
                 <option key={tag.id} value={tag.id}>{tag.name}</option>
             ))}
             <option value="addTag">+ add a Tag</option>
           </select>
           <input type="submit" value="update"/>
+          <button onClick={()=>reset()}>reset</button>
           <button onClick={onClose}>cancel</button>
         </form>
       </div>

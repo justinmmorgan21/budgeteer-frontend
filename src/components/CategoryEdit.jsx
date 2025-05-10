@@ -61,11 +61,9 @@ export function CategoryEdit( { onClose, cat, onUpdate } ) {
   const deleteTag = async (event, tag) => {
     const params = new FormData();
     params.append("archive", true);
-    const patchResponse = await axios.patch(`http://localhost:5000/tags/${tag.id}`, params)
-    console.log("patchResponse: ", patchResponse);
+    await axios.patch(`http://localhost:5000/tags/${tag.id}`, params)
     const getResponse = await axios.get('http://localhost:5000/categories');
     const updatedTags = getResponse.data.find(category=>category.id == cat.id).tags.filter(tag=>!tag.archived)
-    console.log(updatedTags);
     setTags(updatedTags);
     setInputTags(updatedTags);
     onUpdate(cat.name, updatedTags, false);
@@ -74,12 +72,10 @@ export function CategoryEdit( { onClose, cat, onUpdate } ) {
   const archive = () => {
     const params = new FormData();
     params.append("archive", true);
-    axios.patch(`http://localhost:5000/categories/${cat.id}`, params).then(response=> {
-      console.log(response.data);
+    axios.patch(`http://localhost:5000/categories/${cat.id}`, params).then(()=> {
       onUpdate(cat.name, cat.tags, true);
       tags.forEach(tag => {
-        axios.patch(`http://localhost:5000/tags/${tag.id}`, params).then(response=> {
-          console.log(response.data);
+        axios.patch(`http://localhost:5000/tags/${tag.id}`, params).then(()=> {
         })
       })
     })

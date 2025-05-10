@@ -55,7 +55,7 @@ export function TransactionsIndex({transactions, categories, setCategories, onEd
         return;
       }
     }
-    params.append("category", selection);
+    params.append("category_id", selection);
     axios.patch(`http://localhost:5000/transactions/${txId}`, params).then(response => {
       setTransactions(transactions.map(t => {
         return (t.id === txId)  
@@ -79,7 +79,7 @@ export function TransactionsIndex({transactions, categories, setCategories, onEd
         return
       }
     }
-    params.append("tag", selection);
+    params.append("tag_id", selection);
     axios.patch(`http://localhost:5000/transactions/${tx.id}`, params).then(response => {
       setTransactions(transactions.map(t => {
         return (t.id === tx.id)
@@ -90,6 +90,7 @@ export function TransactionsIndex({transactions, categories, setCategories, onEd
             }
           : t;
       }));
+      
 
       // Can't get a new tag to associate with the category so that when the edit button is chosen,
       // the tag reflects the new tag created above. Below was an attempt but did not work.
