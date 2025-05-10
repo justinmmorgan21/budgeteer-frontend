@@ -2,7 +2,7 @@ import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-export function TransactionEdit( { onClose, tx, categories, setCategories, onUpdate, setUpdatedCategory, setUpdatedTransaction } ) {
+export function TransactionEdit( { onClose, tx, categories, setCategories, onUpdate, setUpdatedCategory, setUpdatedTransaction, saveScroll } ) {
   const [category, setCategory] = useState(tx.category);
   const [tag, setTag] = useState(tx.tag);
   const navigate = useNavigate();
@@ -51,6 +51,7 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
         setCategory(getResponse.data.find(cat=>cat.id == category.id));
 
         const newCategory = getResponse.data;
+        saveScroll();
         setUpdatedCategory(newCategory.find(cat=>cat.id == category.id));
 
         return newTag;
@@ -79,6 +80,7 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
     params.append('category_id', '');
     params.append('tag_id', '');
     axios.patch(`http://localhost:5000/transactions/${tx.id}`, params).then(response => {
+      saveScroll();
       setUpdatedTransaction(response.data);
       onClose();
       navigate('/transactions');
@@ -124,7 +126,7 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
               setTag(e.target.value)
             }
           }} value={tag?.id} name="tag_id">
-            {category.tags.map(tag => (
+            {category.tags.filter(tag=>!tag.archived).map(tag => (
                 <option key={tag.id} value={tag.id}>{tag.name}</option>
             ))}
             <option value="addTag">+ add a Tag</option>

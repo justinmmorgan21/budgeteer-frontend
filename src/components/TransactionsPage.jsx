@@ -16,7 +16,15 @@ export function TransactionsPage() {
   const [ totalPages, setTotalPages ] = useState(loadedTransactionsData.total_pages);
   const [updatedCategory, setUpdatedCategory] = useState(null);
   const [updatedTransaction, setUpdatedTransaction] = useState(null);
-  // const [ scrollPosition, setScrollPosition ] = useState(0);
+  const scrollYRef = useRef(0);
+
+  const saveScroll = () => {
+    scrollYRef.current = window.scrollY;
+  };
+
+  const restoreScroll = () => {
+    window.scrollTo({ top: scrollYRef.current, behavior: 'instant' });
+  };
 
   const handleClose = () => {
     setModalVisible(false);
@@ -40,6 +48,7 @@ export function TransactionsPage() {
 
   const fileUpload = (event) => {
     event.preventDefault();
+    saveScroll();
     const params = new FormData(event.target);
     axios.post("http://localhost:5000/transactions/upload", params).then(() => {
       axios.get(`http://localhost:5000/transactions?page=${currentPage}&per_page=${25}`).then(response => {
@@ -52,28 +61,12 @@ export function TransactionsPage() {
   }
 
   const updatePagination = (newPageNum) => {
+    saveScroll();
     setCurrentPage(newPageNum);
     axios.get(`http://localhost:5000/transactions?page=${newPageNum}&per_page=${25}`).then(response => {
       setTransactions(response.data.transactions);
     })
   }
-
-  // useEffect(() => {
-  //   const handleScroll = () => {
-  //     setScrollPosition(window.pageYOffset || document.documentElement.scrollTop);
-  //   };
-
-  //   window.addEventListener('scroll', handleScroll);
-  //   handleScroll(); // Set initial scroll position on mount
-
-  //   return () => {
-  //     window.removeEventListener('scroll', handleScroll);
-  //   };
-  // }, []);
-
-  // useEffect(() => {
-  //   window.scrollTo(0, scrollPosition);
-  // }, [scrollPosition]);
 
   useEffect(() => {
     if (updatedCategory) {
@@ -94,6 +87,12 @@ export function TransactionsPage() {
     }
   }, [updatedTransaction])
 
+  useEffect(() => {
+    if (transactions.length > 0) {
+      restoreScroll();
+    }
+  }, [transactions]);
+
   return (
     <main style={{width:"80%", margin:"20px auto"}}>
       <div style={{display:"flex", alignItems:"center", justifyContent:"space-between"}}>
@@ -108,10 +107,10 @@ export function TransactionsPage() {
       </div>
       <br />
       <TransactionsIndex transactions={transactions} categories={categories} setCategories={setCategories} onEdit={handleTxEdit} 
-                          setTransactions={setTransactions} setTxInPage={setTxInPage}/>
+                          setTransactions={setTransactions} setTxInPage={setTxInPage} saveScroll={saveScroll}/>
       <Modal onClose={handleClose} show={modalVisible}>
         <TransactionEdit onClose={handleClose} tx={currentTx} categories={categories} setCategories={setCategories} onUpdate={onUpdate} 
-                          setUpdatedCategory={setUpdatedCategory} setUpdatedTransaction={setUpdatedTransaction}/>
+                          setUpdatedCategory={setUpdatedCategory} setUpdatedTransaction={setUpdatedTransaction} saveScroll={saveScroll}/>
       </Modal>
       <div style={{width:"100%", display:"flex", justifyContent:"center", gap:"12px"}}>
         {currentPage > 1 ? <span onClick={()=>updatePagination(currentPage - 1)} style={{cursor:"pointer", textDecoration:"underline"}}>{`<<`}</span> : null}
