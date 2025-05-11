@@ -68,6 +68,45 @@ export function TransactionsPage() {
     })
   }
 
+  const PageList = () => {
+    const pageNums = [];
+    const pageChoices = 5;
+    let startPageNum = currentPage - Math.floor(pageChoices / 2);
+    if (currentPage >= 1 && currentPage <= Math.floor(pageChoices / 2)) { 
+      startPageNum = 1; 
+    } else if (totalPages - currentPage < (Math.floor(pageChoices / 2) + 1)) { 
+      startPageNum = totalPages - (pageChoices - 1); 
+    }
+    for (let i = startPageNum; i < Math.min(startPageNum + pageChoices, totalPages + 1); i++) {
+      pageNums.push(i);
+    }
+
+    return (
+    <div style={{width:"100%", display:"flex", justifyContent:"center", gap:"12px"}}>
+      {currentPage > 1 ? <span onClick={()=>updatePagination(currentPage - 1)} style={{cursor:"pointer", textDecoration:"underline"}}>{`<<`}</span> : null}
+      <div> &nbsp;Page&nbsp;
+        {
+          currentPage > (pageChoices - 1) ?
+          <span><span onClick={()=>updatePagination(1)} style={{cursor:"pointer"}}>1</span> {'...'}</span> : null
+        }
+        {
+          pageNums.map(num => 
+          <div style={{display:"inline"}}>
+          <span key={num} onClick={()=>updatePagination(num)} style={{cursor:"pointer", textDecoration:num === currentPage ? "underline":"none"}}>{num}</span>
+          &nbsp;
+          </div>
+        )
+        }
+        {
+          currentPage < totalPages - (Math.floor(pageChoices / 2) + 1) ?
+          <span>{' ... '} <span onClick={()=>updatePagination(totalPages)} style={{cursor:"pointer"}}>{totalPages}</span></span> : null 
+        }
+      </div>
+      {currentPage < totalPages ? <span onClick={()=>updatePagination(currentPage + 1)} style={{cursor:"pointer", textDecoration:"underline"}}>{`>>`}</span> : null}
+    </div>
+    );
+  }
+
   useEffect(() => {
     if (updatedCategory) {
       setTransactions(prev => prev.map(tx =>
@@ -112,11 +151,7 @@ export function TransactionsPage() {
         <TransactionEdit onClose={handleClose} tx={currentTx} categories={categories} setCategories={setCategories} onUpdate={onUpdate} 
                           setUpdatedCategory={setUpdatedCategory} setUpdatedTransaction={setUpdatedTransaction} saveScroll={saveScroll}/>
       </Modal>
-      <div style={{width:"100%", display:"flex", justifyContent:"center", gap:"12px"}}>
-        {currentPage > 1 ? <span onClick={()=>updatePagination(currentPage - 1)} style={{cursor:"pointer", textDecoration:"underline"}}>{`<<`}</span> : null}
-        <span> Page {currentPage} </span>
-        {currentPage < totalPages ? <span onClick={()=>updatePagination(currentPage + 1)} style={{cursor:"pointer", textDecoration:"underline"}}>{`>>`}</span> : null}
-      </div>
+      <PageList />
     </main>
   );
 }
