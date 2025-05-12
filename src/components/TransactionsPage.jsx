@@ -1,5 +1,6 @@
 import { TransactionsIndex } from "./TransactionsIndex";
 import { TransactionEdit } from "./TransactionEdit";
+import { ListCustomizer } from "./ListCustomizer";
 import { useLoaderData } from "react-router-dom";
 import { useState, useRef, useEffect } from 'react';
 import { Modal } from "./Modal";
@@ -18,6 +19,8 @@ export function TransactionsPage() {
   const [updatedTransaction, setUpdatedTransaction] = useState(null);
   const scrollYRef = useRef(0);
   const [ searchText, setSearchText ] = useState("");
+  const [ startDate, setStartDate ] = useState();
+  const [ endDate, setEndDate ] = useState();
 
   const saveScroll = () => {
     scrollYRef.current = window.scrollY;
@@ -86,22 +89,15 @@ export function TransactionsPage() {
     <div style={{width:"100%", display:"flex", justifyContent:"center", gap:"12px"}}>
       {currentPage > 1 ? <span onClick={()=>updatePagination(currentPage - 1)} style={{cursor:"pointer", textDecoration:"underline"}}>{`<<`}</span> : null}
       <div> &nbsp;Page&nbsp;
-        {
-          startPageNum > 1 ?
-          <span><span onClick={()=>updatePagination(1)} style={{cursor:"pointer"}}>1</span> {'... '}&nbsp;</span> : null
-        }
-        {
-          pageNums.map(num => 
+        { startPageNum > 1 ?
+          <span><span onClick={()=>updatePagination(1)} style={{cursor:"pointer"}}>1</span> {'... '}&nbsp;</span> : null }
+        { pageNums.map(num => 
           <div key={num} style={{display:"inline"}}>
           <span onClick={()=>updatePagination(num)} style={{cursor:"pointer", textDecoration:num === currentPage ? "underline":"none"}}>{num}</span>
           &nbsp;&nbsp;
-          </div>
-        )
-        }
-        {
-          currentPage <= totalPages - (Math.floor(pageChoices / 2) + 1) && totalPages > 9?
-          <span>{'... '} <span onClick={()=>updatePagination(totalPages)} style={{cursor:"pointer"}}>{totalPages}&nbsp;</span></span> : null 
-        }
+          </div>)}
+        { currentPage <= totalPages - (Math.floor(pageChoices / 2) + 1) && totalPages > 9 ?
+          <span>{'... '} <span onClick={()=>updatePagination(totalPages)} style={{cursor:"pointer"}}>{totalPages}&nbsp;</span></span> : null }
       </div>
       {currentPage < totalPages ? <span onClick={()=>updatePagination(currentPage + 1)} style={{cursor:"pointer", textDecoration:"underline"}}>{`>>`}</span> : null}
     </div>
@@ -110,18 +106,25 @@ export function TransactionsPage() {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    let searchValue = "";
+    let searchValue = "", startDateValue = "", endDateValue = "";
     if (e.target instanceof HTMLFormElement) {
-      searchValue = new FormData(e.target).get("searchValue");
+      const params = new FormData(e.target);
+      searchValue = params.get("searchValue");
+      startDateValue = params.get("startDate");
+      endDateValue = params.get("endDate");
     } else {
       setSearchText("");
+      setStartDate("");
+      setEndDate("");
     }
     setCurrentPage(1);
     axios.get(`http://localhost:5000/transactions`, {
       params: {
         page: 1,
         per_page: 25,
-        search: searchValue
+        search: searchValue,
+        startDate: startDateValue,
+        endDate: endDateValue
       }
     }).then(response => {
       setTransactions(response.data.transactions);
@@ -167,11 +170,8 @@ export function TransactionsPage() {
           </div>
         </form>
       </div>
-      <form onSubmit={handleSearch}>
-        <input type="text" style={{ padding:"6px", width:"300px" }} id="searchValue" name="searchValue" value={searchText} onChange={(e) => setSearchText(e.target.value)}/>
-        <input type="submit" style={{ padding:"6px 8px", margin:"0 6px"}} value="Search"/>
-        <button onClick={(e)=>{handleSearch(e);}} style={{ padding:"6px 8px"}}>Cancel</button>
-      </form>
+      <ListCustomizer searchText={searchText} setSearchText={setSearchText} startDate={startDate} setStartDate={setStartDate}
+                      endDate={endDate} setEndDate={setEndDate} handleSearch={handleSearch} />
       <br />
       <br />
       <TransactionsIndex transactions={transactions} categories={categories} setCategories={setCategories} onEdit={handleTxEdit} 
