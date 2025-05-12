@@ -51,11 +51,11 @@ export function TransactionsPage() {
     saveScroll();
     const params = new FormData(event.target);
     axios.post("http://localhost:5000/transactions/upload", params).then(() => {
-      axios.get(`http://localhost:5000/transactions?page=${currentPage}&per_page=${25}`).then(response => {
+      setCurrentPage(1);
+      axios.get(`http://localhost:5000/transactions?page=${1}&per_page=${25}`).then(response => {
         setTransactions(response.data.transactions);
         fileInputRef.current.value = null;
-        setTotalPages(totalPages + response.data.total_pages);
-        setCurrentPage(1);
+        setTotalPages(response.data.total_pages);
       })
     })
   }
@@ -70,9 +70,9 @@ export function TransactionsPage() {
 
   const PageList = () => {
     const pageNums = [];
-    const pageChoices = 5;
+    const pageChoices = 9;
     let startPageNum = currentPage - Math.floor(pageChoices / 2);
-    if (currentPage >= 1 && currentPage <= Math.floor(pageChoices / 2)) { 
+    if (currentPage >= 1 && currentPage <= Math.floor(pageChoices / 2) || totalPages < pageChoices - 1) { 
       startPageNum = 1; 
     } else if (totalPages - currentPage < (Math.floor(pageChoices / 2) + 1)) { 
       startPageNum = totalPages - (pageChoices - 1); 
@@ -86,20 +86,20 @@ export function TransactionsPage() {
       {currentPage > 1 ? <span onClick={()=>updatePagination(currentPage - 1)} style={{cursor:"pointer", textDecoration:"underline"}}>{`<<`}</span> : null}
       <div> &nbsp;Page&nbsp;
         {
-          currentPage > (pageChoices - 1) ?
-          <span><span onClick={()=>updatePagination(1)} style={{cursor:"pointer"}}>1</span> {'...'}</span> : null
+          startPageNum > 1 ?
+          <span><span onClick={()=>updatePagination(1)} style={{cursor:"pointer"}}>1</span> {'... '}&nbsp;</span> : null
         }
         {
           pageNums.map(num => 
           <div style={{display:"inline"}}>
           <span key={num} onClick={()=>updatePagination(num)} style={{cursor:"pointer", textDecoration:num === currentPage ? "underline":"none"}}>{num}</span>
-          &nbsp;
+          &nbsp;&nbsp;
           </div>
         )
         }
         {
-          currentPage < totalPages - (Math.floor(pageChoices / 2) + 1) ?
-          <span>{' ... '} <span onClick={()=>updatePagination(totalPages)} style={{cursor:"pointer"}}>{totalPages}</span></span> : null 
+          currentPage <= totalPages - (Math.floor(pageChoices / 2) + 1) && totalPages > 9?
+          <span>{'... '} <span onClick={()=>updatePagination(totalPages)} style={{cursor:"pointer"}}>{totalPages}&nbsp;</span></span> : null 
         }
       </div>
       {currentPage < totalPages ? <span onClick={()=>updatePagination(currentPage + 1)} style={{cursor:"pointer", textDecoration:"underline"}}>{`>>`}</span> : null}
