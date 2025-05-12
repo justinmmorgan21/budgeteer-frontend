@@ -17,6 +17,7 @@ export function TransactionsPage() {
   const [updatedCategory, setUpdatedCategory] = useState(null);
   const [updatedTransaction, setUpdatedTransaction] = useState(null);
   const scrollYRef = useRef(0);
+  const [ searchText, setSearchText ] = useState("");
 
   const saveScroll = () => {
     scrollYRef.current = window.scrollY;
@@ -91,8 +92,8 @@ export function TransactionsPage() {
         }
         {
           pageNums.map(num => 
-          <div style={{display:"inline"}}>
-          <span key={num} onClick={()=>updatePagination(num)} style={{cursor:"pointer", textDecoration:num === currentPage ? "underline":"none"}}>{num}</span>
+          <div key={num} style={{display:"inline"}}>
+          <span onClick={()=>updatePagination(num)} style={{cursor:"pointer", textDecoration:num === currentPage ? "underline":"none"}}>{num}</span>
           &nbsp;&nbsp;
           </div>
         )
@@ -107,10 +108,32 @@ export function TransactionsPage() {
     );
   }
 
+  const handleSearch = (e) => {
+    e.preventDefault();
+    let searchValue = "";
+    if (e.target instanceof HTMLFormElement) {
+      searchValue = new FormData(e.target).get("searchValue");
+    } else {
+      setSearchText("");
+    }
+    setCurrentPage(1);
+    axios.get(`http://localhost:5000/transactions`, {
+      params: {
+        page: 1,
+        per_page: 25,
+        search: searchValue
+      }
+    }).then(response => {
+      setTransactions(response.data.transactions);
+      setTotalPages(response.data.total_pages);
+    });
+  };
+  
+
   useEffect(() => {
     if (updatedCategory) {
       setTransactions(prev => prev.map(tx =>
-        tx.category.id === updatedCategory.id ?
+        tx.category?.id === updatedCategory.id ?
           { ...tx, category: updatedCategory } : tx
         )
       );
@@ -144,6 +167,12 @@ export function TransactionsPage() {
           </div>
         </form>
       </div>
+      <form onSubmit={handleSearch}>
+        <input type="text" style={{ padding:"6px", width:"300px" }} id="searchValue" name="searchValue" value={searchText} onChange={(e) => setSearchText(e.target.value)}/>
+        <input type="submit" style={{ padding:"6px 8px", margin:"0 6px"}} value="Search"/>
+        <button onClick={(e)=>{handleSearch(e);}} style={{ padding:"6px 8px"}}>Cancel</button>
+      </form>
+      <br />
       <br />
       <TransactionsIndex transactions={transactions} categories={categories} setCategories={setCategories} onEdit={handleTxEdit} 
                           setTransactions={setTransactions} setTxInPage={setTxInPage} saveScroll={saveScroll}/>

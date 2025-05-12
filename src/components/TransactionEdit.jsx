@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 export function TransactionEdit( { onClose, tx, categories, setCategories, onUpdate, setUpdatedCategory, setUpdatedTransaction, saveScroll } ) {
   const [category, setCategory] = useState(tx.category);
   const [tag, setTag] = useState(tx.tag);
+  // console.log("tx: ", tx);
   const navigate = useNavigate();
 
   const formatDate = (dateString) => {
@@ -48,11 +49,12 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
         const newTag = postResponse.data;
 
         const getResponse = await axios.get('http://localhost:5000/categories');
-        setCategory(getResponse.data.find(cat=>cat.id == category.id));
+        const newCategory = getResponse.data.find(cat => cat.id == category.id);
+        console.log(newCategory);
+        setCategory(newCategory);
 
-        const newCategory = getResponse.data;
         saveScroll();
-        setUpdatedCategory(newCategory.find(cat=>cat.id == category.id));
+        setUpdatedCategory(newCategory);
 
         return newTag;
       } catch (error) {
@@ -123,9 +125,10 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
                 setTag(newTag)
               }
             } else {
-              setTag(e.target.value)
+              setTag(category.tags.find(t => t.id == e.target.value))
             }
-          }} value={tag?.id} name="tag_id">
+          }} value={tag?.id || ""} name="tag_id">
+            <option value="">-- select a tag --</option>
             {category.tags.filter(tag=>!tag.archived).map(tag => (
                 <option key={tag.id} value={tag.id}>{tag.name}</option>
             ))}
