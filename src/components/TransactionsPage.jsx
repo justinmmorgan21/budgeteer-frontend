@@ -21,6 +21,7 @@ export function TransactionsPage() {
   const [ searchText, setSearchText ] = useState("");
   const [ startDate, setStartDate ] = useState();
   const [ endDate, setEndDate ] = useState();
+  const [ uncategorized, setUncategorized ] = useState(false);
 
   const saveScroll = () => {
     scrollYRef.current = window.scrollY;
@@ -67,7 +68,16 @@ export function TransactionsPage() {
   const updatePagination = (newPageNum) => {
     saveScroll();
     setCurrentPage(newPageNum);
-    axios.get(`http://localhost:5000/transactions?page=${newPageNum}&per_page=${25}`).then(response => {
+    axios.get(`http://localhost:5000/transactions`, {
+      params: {
+        page: newPageNum,
+        per_page: 25,
+        search: searchText,
+        startDate: startDate,
+        endDate: endDate,
+        uncategorized: uncategorized
+      }
+    }).then(response => {
       setTransactions(response.data.transactions);
     })
   }
@@ -124,15 +134,33 @@ export function TransactionsPage() {
         per_page: 25,
         search: searchValue,
         startDate: startDateValue,
-        endDate: endDateValue
+        endDate: endDateValue,
+        uncategorized: uncategorized
       }
     }).then(response => {
       setTransactions(response.data.transactions);
       setTotalPages(response.data.total_pages);
     });
   };
-  
 
+  const handleUncategorized = () => {
+    setCurrentPage(1);
+    axios.get(`http://localhost:5000/transactions`, {
+      params: {
+        page: 1,
+        per_page: 25,
+        search: searchText,
+        startDate: startDate,
+        endDate: endDate,
+        uncategorized: !uncategorized
+      }
+    }).then(response => {
+      setTransactions(response.data.transactions);
+      setTotalPages(response.data.total_pages);
+    });
+    setUncategorized(!uncategorized);
+  }
+  
   useEffect(() => {
     if (updatedCategory) {
       setTransactions(prev => prev.map(tx =>
@@ -170,12 +198,13 @@ export function TransactionsPage() {
           </div>
         </form>
       </div>
-      <ListCustomizer searchText={searchText} setSearchText={setSearchText} startDate={startDate} setStartDate={setStartDate}
-                      endDate={endDate} setEndDate={setEndDate} handleSearch={handleSearch} />
+      <ListCustomizer searchText={searchText} setSearchText={setSearchText} startDate={startDate} setStartDate={setStartDate} endDate={endDate} 
+                      setEndDate={setEndDate} handleSearch={handleSearch}/>
+      <input type="checkbox" checked={uncategorized} onChange={()=>handleUncategorized()} />show uncategorized
       <br />
       <br />
       <TransactionsIndex transactions={transactions} categories={categories} setCategories={setCategories} onEdit={handleTxEdit} 
-                          setTransactions={setTransactions} setTxInPage={setTxInPage} saveScroll={saveScroll}/>
+                          setTransactions={setTransactions} setTxInPage={setTxInPage} saveScroll={saveScroll} uncategorized={uncategorized}/>
       <Modal onClose={handleClose} show={modalVisible}>
         <TransactionEdit onClose={handleClose} tx={currentTx} categories={categories} setCategories={setCategories} onUpdate={onUpdate} 
                           setUpdatedCategory={setUpdatedCategory} setUpdatedTransaction={setUpdatedTransaction} saveScroll={saveScroll}/>

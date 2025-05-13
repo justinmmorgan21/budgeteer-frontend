@@ -7,7 +7,7 @@ export function ListCustomizer({searchText, setSearchText, startDate, setStartDa
         <span> to </span> 
         <input type="date" name="endDate" onChange={(e)=>setEndDate(e.target.value)} value={endDate} />
         <input type="submit" style={{ padding:"6px 8px", margin:"0 6px"}} value="Search"/>
-        <button onClick={(e)=>{handleSearch(e);}} style={{ padding:"6px 8px"}}>Cancel</button>
+        <button onClick={(e)=>{handleSearch(e)}} style={{ padding:"6px 8px"}}>Cancel</button>
     </form>
   );
 }

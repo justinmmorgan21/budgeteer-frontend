@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 export function TransactionEdit( { onClose, tx, categories, setCategories, onUpdate, setUpdatedCategory, setUpdatedTransaction, saveScroll } ) {
   const [category, setCategory] = useState(tx.category);
   const [tag, setTag] = useState(tx.tag);
-  // console.log("tx: ", tx);
   const navigate = useNavigate();
 
   const formatDate = (dateString) => {
@@ -50,7 +49,6 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
 
         const getResponse = await axios.get('http://localhost:5000/categories');
         const newCategory = getResponse.data.find(cat => cat.id == category.id);
-        console.log(newCategory);
         setCategory(newCategory);
 
         saveScroll();
