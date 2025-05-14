@@ -5,9 +5,11 @@ import { IoCloseOutline } from "react-icons/io5";
 export function CategoryEdit( { onClose, cat, onUpdate } ) {
   const navigate = useNavigate();
   const originalCatName = cat.name;
+  const originalBudget = cat.budget_amount;
   const [ tags, setTags ] = useState(cat.tags);
   const [ catName, setCatName ] = useState(cat.name);
   const [ inputTags, setInputTags ] = useState(cat.tags);
+  const [ budget, setBudget ] = useState(cat.budget_amount);
 
   const addTag = async () => {
     const userInput = prompt("Please enter a new tag name for " + cat.name + ":", "tag name");
@@ -35,7 +37,7 @@ export function CategoryEdit( { onClose, cat, onUpdate } ) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const params = new FormData(event.target);
-    if (params.get("catName") !== originalCatName) {
+    if (params.get("catName") !== originalCatName || params.get("budget") !== originalBudget) {
       await axios.patch(`http://localhost:5000/categories/${cat.id}`, params)
     }
     const updatedTags = await Promise.all(
@@ -47,7 +49,7 @@ export function CategoryEdit( { onClose, cat, onUpdate } ) {
         return tag;
       })
     );
-    onUpdate(catName, updatedTags);
+    onUpdate(params.get("catName"), updatedTags, null, params.get("budget"));
     onClose();
     navigate(`/categories`);
   }
@@ -89,8 +91,13 @@ export function CategoryEdit( { onClose, cat, onUpdate } ) {
           <input type="text" id="catName" name="catName" value={catName} onChange={(e) => setCatName(e.target.value)}/>
         </div>
         <br />
+        <div>
+          <label htmlFor="budget">Budget: </label>
+          <input type="text" id="budget" name="budget" value={budget} onChange={(e) => setBudget(e.target.value)}/>
+        </div>
+        <br />
         <span style={{marginBottom:"6px"}}>Tags:</span>
-        {inputTags.filter(tag=>!tag.archived).map(tag => (
+        {inputTags.filter(tag=>!tag.archived && tag.name != '-').map(tag => (
           <div key={tag.id} style={{marginBottom:"6px"}}>
             <label htmlFor={tag.name}></label>
             <input type="text"  name={tag.id} value={tag.name} onChange={(event)=>updateInputTag(event, tag)}/>

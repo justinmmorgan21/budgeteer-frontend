@@ -10,7 +10,6 @@ export function CategoriesPage() {
   const [ categories, setCategories ] = useState(loadedCategories);
   const [ modalVisible, setModalVisible ] = useState(false);
   const [ currentCat, setCurrentCat ] = useState(null);
-
   const navigate = useNavigate();
 
   const handleClose = () => {
@@ -22,7 +21,7 @@ export function CategoriesPage() {
     setCurrentCat(cat);
   }
 
-  const onUpdate = (catName, newTags, archivedUpdate) => {
+  const onUpdate = (catName, newTags, archivedUpdate, budget) => {
     setCategories(prev => 
       prev.map(cat => {
         return cat.id === currentCat.id ? 
@@ -30,7 +29,8 @@ export function CategoriesPage() {
           ...cat,
           name: catName,
           tags: newTags,
-          archived: archivedUpdate
+          archived: archivedUpdate || cat.archived,
+          budget_amount: budget
         }
         : 
         cat

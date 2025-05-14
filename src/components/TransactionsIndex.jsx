@@ -156,7 +156,7 @@ export function TransactionsIndex({transactions, categories, setCategories, onEd
       </div>
       <div style={{display: "inline-block", width:"150px"}}>
         {t.tag ? (
-          <span>{t.tag.name}</span>
+          (t.tag.name != '-' ? <span>{t.tag.name}</span> : null )
         ) : (
           t.category && (
             <select onChange={(event) => handleTagSelect(event, t)}>
