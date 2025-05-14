@@ -187,11 +187,11 @@ export function TransactionsPage() {
   }, [transactions]);
 
   return (
-    <main style={{width:"80%", margin:"20px auto"}}>
+    <main style={{width:"80%", margin:"20px auto", border:"0px solid black"}}>
       <div style={{display:"flex", alignItems:"center", justifyContent:"space-between"}}>
         <h1>All transactions</h1>
         <form style={{border:"1px solid black", padding:"12px", borderRadius:"5px"}} onSubmit={(event)=>fileUpload(event)}>
-          <div style={{display:'flex', flexDirection:"column", gap:"6px"}}>
+          <div style={{display:'flex', flexDirection:"column", gap:"8px"}}>
             <label htmlFor="file">Upload Statement:</label>
             <input type="file" id="file" name="file" ref={fileInputRef} style={{height:"fit-content"}} />
             <input type="submit" />
@@ -200,6 +200,7 @@ export function TransactionsPage() {
       </div>
       <ListCustomizer searchText={searchText} setSearchText={setSearchText} startDate={startDate} setStartDate={setStartDate} endDate={endDate} 
                       setEndDate={setEndDate} handleSearch={handleSearch}/>
+      <br />
       <input type="checkbox" checked={uncategorized} onChange={()=>handleUncategorized()} />show uncategorized
       <br />
       <br />

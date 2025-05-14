@@ -136,11 +136,11 @@ export function TransactionsIndex({transactions, categories, setCategories, onEd
   }
 
   const TransactionItem = ({ t }) => (
-    <div style={{border:"solid black 1px", padding:"10px", marginBottom:"8px", borderRadius:"5px"}}>
+    <div style={{border:"solid black 0px", padding:"10px 10px 0 10px", marginBottom:"8px", borderRadius:"5px"}}>
       <span style={{display: "inline-block", width:"140px"}}>{t.type}</span>
-      <span style={{display: "inline-block", width:"130px"}}> {formatDate(t.date)}</span>
-      <span style={{display: "inline-block", width:"100px"}}> {t.type==='DEPOSIT' ? `($${t.amount})` : `$${t.amount}`}</span>
-      <span style={{display: "inline-block", width:"600px"}}> {t.payee}</span>
+      <span style={{display: "inline-block", width:"120px"}}> {formatDate(t.date)}</span>
+      <span style={{display: "inline-block", width:"110px"}}> {t.type==='DEPOSIT' ? `($${t.amount})` : `$${t.amount}`}</span>
+      <span style={{display: "inline-block", width:"540px"}}> {t.payee}</span>
       <div style={{display: "inline-block", width:"150px"}}>
         {t.category ? (
           <span>{t.category.name}</span>
@@ -177,20 +177,23 @@ export function TransactionsIndex({transactions, categories, setCategories, onEd
         :
         null
       }
+      <hr style={{marginTop:"16px"}}/>
     </div>
   )
 
   return (
     <div>
-      <div style={{ padding:"6px", fontWeight:"bold"}}>
+      <div style={{ padding:"6px", fontWeight:"bold", fontSize:"1.2em", border:"0px solid black", width:"fit-content", margin:"0 auto"}}>
         <span style={{display: "inline-block", width:"140px"}}>type</span>
-        <span style={{display: "inline-block", width:"130px"}}>date</span>
-        <span style={{display: "inline-block", width:"100px"}}>amount</span>
-        <span style={{display: "inline-block", width:"600px"}}>payee</span>
+        <span style={{display: "inline-block", width:"120px"}}>date</span>
+        <span style={{display: "inline-block", width:"110px"}}>amount</span>
+        <span style={{display: "inline-block", width:"540px"}}>description</span>
         <span style={{display: "inline-block", width:"150px"}}>category</span>
         <span style={{display: "inline-block", width:"100px"}}>tag</span>
+        <span style={{display: "inline-block", width:"94px"}}> </span>
       </div>
-      <div style={{width:"fit-content"}}>
+      <hr />
+      <div style={{width:"fit-content", border:"0px solid black", margin:"0 auto"}}>
         {transactions.map(t => (
           <TransactionItem key={t.id} t={t} />
         ))}
