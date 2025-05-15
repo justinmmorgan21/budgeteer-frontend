@@ -22,6 +22,7 @@ export function TransactionsPage() {
   const [ startDate, setStartDate ] = useState();
   const [ endDate, setEndDate ] = useState();
   const [ uncategorized, setUncategorized ] = useState(false);
+  const [ statementChecked, setStatementChecked ] = useState(true);
 
   const saveScroll = () => {
     scrollYRef.current = window.scrollY;
@@ -55,6 +56,7 @@ export function TransactionsPage() {
     event.preventDefault();
     saveScroll();
     const params = new FormData(event.target);
+    params.append('uploadType', statementChecked ? 'statement' : 'currentHistory');
     axios.post("http://localhost:5000/transactions/upload", params).then(() => {
       setCurrentPage(1);
       axios.get(`http://localhost:5000/transactions?page=${1}&per_page=${25}`).then(response => {
@@ -80,6 +82,23 @@ export function TransactionsPage() {
     }).then(response => {
       setTransactions(response.data.transactions);
     })
+  }
+
+  const FileUpload = () => {
+    return (
+      <form style={{border:"1px solid black", padding:"12px", borderRadius:"5px"}} onSubmit={(event)=>fileUpload(event)}>
+        <div style={{display:'flex', flexDirection:"column", gap:"8px"}}>
+          <label htmlFor="file">Upload Statement:</label>
+          <input type="file" id="file" name="file" ref={fileInputRef} style={{height:"fit-content"}} />
+          <div style={{display:"inline"}}>
+            <input type="checkbox" checked={statementChecked} onChange={()=>setStatementChecked(!statementChecked)} />old statement
+            &nbsp;
+            <input type="checkbox" checked={!statementChecked} onChange={()=>setStatementChecked(!statementChecked)} />current history
+          </div>
+          <input type="submit" />
+        </div>
+      </form>
+    );
   }
 
   const PageList = () => {
@@ -190,13 +209,7 @@ export function TransactionsPage() {
     <main style={{width:"80%", margin:"20px auto", border:"0px solid black"}}>
       <div style={{display:"flex", alignItems:"center", justifyContent:"space-between"}}>
         <h1>All transactions</h1>
-        <form style={{border:"1px solid black", padding:"12px", borderRadius:"5px"}} onSubmit={(event)=>fileUpload(event)}>
-          <div style={{display:'flex', flexDirection:"column", gap:"8px"}}>
-            <label htmlFor="file">Upload Statement:</label>
-            <input type="file" id="file" name="file" ref={fileInputRef} style={{height:"fit-content"}} />
-            <input type="submit" />
-          </div>
-        </form>
+        <FileUpload />
       </div>
       <ListCustomizer searchText={searchText} setSearchText={setSearchText} startDate={startDate} setStartDate={setStartDate} endDate={endDate} 
                       setEndDate={setEndDate} handleSearch={handleSearch}/>

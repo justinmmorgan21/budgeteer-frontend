@@ -9,9 +9,21 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    const month = date.getMonth() + 1;
-    const day = date.getDate() + 1;
-    const year = date.getFullYear();
+    let month = date.getMonth() + 1;
+    let day = date.getDate() + 1;
+    let year = date.getFullYear();
+    const isLeapYear = year % 400 == 0 || (year % 100 != 0 && year % 4 == 0)
+    if (((month===1||month===3||month===5||month===7||month===8||month===10||month===12) && day === 32) ||
+        ((month===4||month===6||month===9||month===11) && day === 31) ||
+        (!isLeapYear && (month===2) && day === 29) ||
+        (isLeapYear && (month===2) && day === 30)) {
+      month++;
+      day = 1;
+      if (month===13) {
+        month = 1;
+        year++;
+      }
+    }
     return month + "/" + day + "/" + year;
   }
 
