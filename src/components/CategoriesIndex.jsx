@@ -5,6 +5,7 @@ export function CategoriesIndex({categories, onEdit }) {
       <h3 style={{border:"0px solid gray"}}>{cat.name}</h3>
       <p>Amount: ${cat.accumulated}</p>
       <p>Budgeted: ${cat.budget_amount}</p>
+      <progress id="file" max={cat.budget_amount} value={cat.accumulated}></progress>
       {/* <ul >
       {cat.tags.filter(tag=>!tag.archived && tag.name != '-').map(tag => (
           <li key={tag.id} style={{border:"0px solid gray"}}>{tag.name}</li>
