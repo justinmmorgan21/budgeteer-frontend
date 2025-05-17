@@ -2,6 +2,25 @@ import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { IoCloseOutline } from "react-icons/io5";
+
+const TagItem = ({ tag, updateInputTagName, updateInputTagBudget, deleteTag }) => (
+  <div style={{ display: 'flex' }}>
+    <div key={tag.id} style={{ marginBottom: "6px", border: "1px solid black", borderRadius: "5px", padding: "8px" }}>
+      <div>
+        <label htmlFor={tag.name}>name: </label>
+        <input type="text" name={`${tag.id}_name`} value={tag.name} onChange={(event) => updateInputTagName(event, tag)} />
+      </div>
+      <div>
+        <label htmlFor={tag.name}>budget: </label>
+        <input type="text" name={`${tag.id}_budget`} value={tag.budget_amount} onChange={(event) => updateInputTagBudget(event, tag)} />
+      </div>
+    </div>
+    <a style={{ margin: "auto 0px", display: "inline", cursor: "pointer" }} onClick={(e) => deleteTag(e, tag)}>
+      <IoCloseOutline />
+    </a>
+  </div>
+);
+
 export function BudgetModal( { onClose, cat, onUpdate } ) {
   const navigate = useNavigate();
   const originalCatName = cat.name;
@@ -42,21 +61,31 @@ export function BudgetModal( { onClose, cat, onUpdate } ) {
     }
     const updatedTags = await Promise.all(
       tags.map(async (tag) => {
-        if (params.has(tag.id) && params.get(tag.id) !== tag.name) {
+        if (params.has(tag.id+"_name") && params.get(tag.id+"_name") != tag.name) {
           const tagUpdate = await axios.patch(`http://localhost:5000/tags/${tag.id}`, params)
           return { ...tag, name: tagUpdate.data.name };
+        }
+        else if (params.has(tag.id+"_budget") && params.get(tag.id+"_budget") != tag.budget_amount) {
+          const tagUpdate = await axios.patch(`http://localhost:5000/tags/${tag.id}`, params)
+          return { ...tag, budget_amount: tagUpdate.data.budget_amount };
         }
         return tag;
       })
     );
     onUpdate(params.get("catName"), updatedTags, null, params.get("budget"));
     onClose();
-    navigate(`/categories`);
+    navigate(`/budgets`);
   }
 
-  const updateInputTag = (event, tag) => {
+  const updateInputTagName = (event, tag) => {
     setInputTags(inputTags.map(t =>
       t.id === tag.id ? { ...t, name: event.target.value } : t
+    ));
+  }
+
+  const updateInputTagBudget = (event, tag) => {
+    setInputTags(inputTags.map(t =>
+      t.id === tag.id ? { ...t, budget_amount: event.target.value } : t
     ));
   }
 
@@ -94,22 +123,24 @@ export function BudgetModal( { onClose, cat, onUpdate } ) {
         <div>
           <label htmlFor="budget">Budget: </label>
           <input type="text" id="budget" name="budget" value={budget} onChange={(e) => setBudget(e.target.value)}/>
+          {/* <input type="text" id="budget" name="budget" value={`$${budget}`} onChange={(e) => setBudget(e.target.value.startsWith("$") ? e.target.value.substring(1) : e.target.value)}/> */}
         </div>
         <br />
-        <span style={{marginBottom:"6px"}}>Tags:</span>
-        {inputTags.filter(tag=>!tag.archived && tag.name != '-').map(tag => (
-          <div key={tag.id} style={{marginBottom:"6px"}}>
-            <label htmlFor={tag.name}></label>
-            <input type="text"  name={tag.id} value={tag.name} onChange={(event)=>updateInputTag(event, tag)}/>
-            <a style={{margin:"auto 0px", display:"inline", cursor:"pointer"}} onClick={(e)=>deleteTag(e, tag)}>
-              <IoCloseOutline />
-            </a>
-          </div>
+        <div>
+          Actual this month: ${cat.accumulated}
+        </div>
+        <br />
+        <span style={{marginBottom:"6px"}}>Subcategories:</span>
+        {inputTags.filter(tag => !tag.archived && tag.name !== '-').map(tag => (
+            <TagItem key={tag.id} tag={tag} updateInputTagName={updateInputTagName} updateInputTagBudget={updateInputTagBudget} deleteTag={deleteTag} />
         ))}
         <br />
-        <button onClick={(e)=>{e.preventDefault(); addTag();}} value="addTag">+ add a Tag</button>
+        Total from subcategories: {inputTags.filter(tag=>!tag.archived && tag.name != '-').reduce((acc, tag)=>acc+Number(tag.budget_amount), 0).toFixed(2)}
         <br />
-        <div>
+        <br />
+        <button onClick={(e)=>{e.preventDefault(); addTag();}} value="addTag">+ add a Subcategory</button>
+        <br />
+        <div style={{display:"flex", justifyContent:"space-between"}}>
           <input type="submit" value="update"/>
           <button onClick={()=>archive()}>archive</button>
           <button onClick={onClose}>cancel</button>
