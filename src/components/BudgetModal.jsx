@@ -14,6 +14,7 @@ const TagItem = ({ tag, updateInputTagName, updateInputTagBudget, deleteTag }) =
         <label htmlFor={tag.name}>budget: </label>
         <input type="text" name={`${tag.id}_budget`} value={tag.budget_amount} onChange={(event) => updateInputTagBudget(event, tag)} />
       </div>
+      actual: ${tag.accumulated}
     </div>
     <a style={{ margin: "auto 0px", display: "inline", cursor: "pointer" }} onClick={(e) => deleteTag(e, tag)}>
       <IoCloseOutline />
