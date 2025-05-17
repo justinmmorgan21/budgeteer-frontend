@@ -1,11 +1,11 @@
-import { CategoriesIndex } from "./CategoriesIndex";
-import { CategoryEdit } from "./CategoryEdit";
+import { BudgetsIndex } from "./BudgetsIndex";
+import { BudgetModal } from "./BudgetModal";
 import { useLoaderData, useNavigate } from "react-router-dom";
 import { useState } from 'react';
 import { Modal } from "./Modal";
 import axios from 'axios';
 
-export function CategoriesPage() {
+export function BudgetsPage() {
   const loadedCategories = useLoaderData();
   const [ categories, setCategories ] = useState(loadedCategories);
   const [ modalVisible, setModalVisible ] = useState(false);
@@ -60,14 +60,14 @@ export function CategoriesPage() {
     <main style={{width:"80%", margin:"20px auto"}}>
       <div style={{display:"flex", height:"fit-content", alignItems:"center"}}>
         <div style={{display:"flex", alignItems:"center", flex:"1 1 auto", gap:"48px"}}>
-          <h1>All categories</h1>
+          <h1>All Budgets</h1>
           <button onClick={()=>addCategory()}>+ add a category</button>
         </div>
         <button onClick={()=>navigate('/archived')}>Archived {'>>>'}</button>
       </div>
-      <CategoriesIndex categories={categories} setCategories={setCategories} onEdit={handleCatEdit}/>
+      <BudgetsIndex categories={categories} setCategories={setCategories} onEdit={handleCatEdit}/>
       <Modal onClose={handleClose} show={modalVisible}>
-        <CategoryEdit onClose={handleClose} cat={currentCat} onUpdate={onUpdate}/>
+        <BudgetModal onClose={handleClose} cat={currentCat} onUpdate={onUpdate}/>
       </Modal>
     </main>
   );

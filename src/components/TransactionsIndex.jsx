@@ -147,7 +147,7 @@ export function TransactionsIndex({transactions, categories, setCategories, onEd
         ) : (
           <select onChange={(event) => handleCategorySelect(event, t.id)}>
             <option></option>
-            {categories?.map(category => (
+            {categories?.sort((a,b)=>a.name.localeCompare(b.name)).map(category => (
               <option key={category.id} value={category.id}>{category.name}</option>
             ))}
             <option value="addCategory">+ add a Category</option>

@@ -1,14 +1,17 @@
-import { CategoriesIndex } from "./CategoriesIndex";
-import { CategoryEdit } from "./CategoryEdit";
-import { useLoaderData } from "react-router-dom";
+import { BudgetsIndex } from "./BudgetsIndex";
+import { BudgetModal } from "./BudgetModal";
+import { useLoaderData, useNavigate } from "react-router-dom";
 import { useState } from 'react';
 import { Modal } from "./Modal";
 import axios from 'axios';
+import { IoMdArrowBack } from "react-icons/io";
 
 export function ArchivedPage() {
   const archived = useLoaderData();
   const [ categories, setCategories ] = useState(archived.categories);
   const [ tags, setTags ] = useState(archived.tags);
+
+  const navigate = useNavigate();
 
   const unarchiveCat = (cat) => {
     const params = new FormData();
@@ -32,6 +35,9 @@ export function ArchivedPage() {
 
   return (
     <main style={{width:"80%", margin:"20px auto"}}>
+      <div style={{cursor:"pointer"}} onClick={()=>navigate("/budgets")}>
+        <IoMdArrowBack /> <span style={{textDecoration:"underline"}}>back to Categories</span>
+      </div>
       <h1>Archived</h1>
       <div style={{display:"flex", width:"100%"}}>
         <div style={{width:"50%"}}>

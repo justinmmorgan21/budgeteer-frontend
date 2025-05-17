@@ -2,7 +2,7 @@ import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { IoCloseOutline } from "react-icons/io5";
-export function CategoryEdit( { onClose, cat, onUpdate } ) {
+export function BudgetModal( { onClose, cat, onUpdate } ) {
   const navigate = useNavigate();
   const originalCatName = cat.name;
   const originalBudget = cat.budget_amount;

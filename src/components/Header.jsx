@@ -5,7 +5,7 @@ export function Header() {
       <nav style={{width:"80%", margin:"0 auto", color:"white"}}>
         <Link style={{margin:"0 12px", color:"white"}} to="/">Home</Link> | 
         <Link style={{margin:"0 12px", color:"white"}} to="/transactions">Transactions</Link> | 
-        <Link style={{margin:"0 12px", color:"white"}} to="/categories">Categories</Link>
+        <Link style={{margin:"0 12px", color:"white"}} to="/budgets">Budgets</Link>
       </nav>
     </header>
   )

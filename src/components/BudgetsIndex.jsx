@@ -1,10 +1,10 @@
 
-export function CategoriesIndex({categories, onEdit }) {
+export function BudgetsIndex({categories, onEdit }) {
   const CategoryItem = ({cat}) => (
     <div style={{border:"1px solid gray", padding:"12px", borderRadius:"5px", boxShadow:"gray 2px 2px"}}>
       <h3 style={{border:"0px solid gray"}}>{cat.name}</h3>
-      <p>Amount: ${cat.accumulated}</p>
-      <p>Budgeted: ${cat.budget_amount}</p>
+      <p>Budget: ${cat.budget_amount}</p>
+      <p>Actual: ${cat.accumulated}</p>
       <progress id="file" max={cat.budget_amount} value={cat.accumulated}></progress>
       {/* <ul >
       {cat.tags.filter(tag=>!tag.archived && tag.name != '-').map(tag => (
