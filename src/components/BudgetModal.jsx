@@ -5,16 +5,19 @@ import { IoCloseOutline } from "react-icons/io5";
 
 const TagItem = ({ tag, updateInputTagName, updateInputTagBudget, deleteTag }) => (
   <div style={{ display: 'flex' }}>
-    <div key={tag.id} style={{ marginBottom: "6px", border: "1px solid black", borderRadius: "5px", padding: "8px" }}>
-      <div>
-        <label htmlFor={tag.name}>name: </label>
-        <input type="text" name={`${tag.id}_name`} value={tag.name} onChange={(event) => updateInputTagName(event, tag)} />
+    <div style={{marginBottom: "6px", border: "1px solid black", borderRadius: "5px", padding: "8px", display:'flex', flexDirection:"column"}}>
+      <div key={tag.id} style={{ display:"flex", gap:"12px", marginBottom:"6px"}}>
+        <div>
+          <label htmlFor={tag.name}>name: </label>
+          <input type="text" name={`${tag.id}_name`} value={tag.name} onChange={(event) => updateInputTagName(event, tag)} />
+        </div>
+        <div>
+          <label htmlFor={tag.name}>budget: </label>
+          <input type="text" name={`${tag.id}_budget`} value={tag.budget_amount} onChange={(event) => updateInputTagBudget(event, tag)} />
+        </div>
+        actual: ${tag.accumulated}
       </div>
-      <div>
-        <label htmlFor={tag.name}>budget: </label>
-        <input type="text" name={`${tag.id}_budget`} value={tag.budget_amount} onChange={(event) => updateInputTagBudget(event, tag)} />
-      </div>
-      actual: ${tag.accumulated}
+      <progress id="file" max={tag.budget_amount} value={tag.accumulated} style={{width:"100%"}}></progress>
     </div>
     <a style={{ margin: "auto 0px", display: "inline", cursor: "pointer" }} onClick={(e) => deleteTag(e, tag)}>
       <IoCloseOutline />
@@ -131,14 +134,20 @@ export function BudgetModal( { onClose, cat, onUpdate } ) {
           Actual this month: ${cat.accumulated}
         </div>
         <br />
-        <span style={{marginBottom:"6px"}}>Subcategories:</span>
-        {inputTags.filter(tag => !tag.archived && tag.name !== '-').map(tag => (
-            <TagItem key={tag.id} tag={tag} updateInputTagName={updateInputTagName} updateInputTagBudget={updateInputTagBudget} deleteTag={deleteTag} />
-        ))}
-        <br />
-        Total from subcategories: {inputTags.filter(tag=>!tag.archived && tag.name != '-').reduce((acc, tag)=>acc+Number(tag.budget_amount), 0).toFixed(2)}
-        <br />
-        <br />
+        {inputTags.filter(tag => !tag.archived && tag.name !== '-').length > 0 ?
+          (<div>
+            <span style={{marginBottom:"6px"}}>Subcategories:</span>
+            {inputTags.filter(tag => !tag.archived && tag.name !== '-').map(tag => (
+              <TagItem key={tag.id} tag={tag} updateInputTagName={updateInputTagName} updateInputTagBudget={updateInputTagBudget} deleteTag={deleteTag} />
+            ))}
+            <br />
+            Total from subcategories: {inputTags.filter(tag=>!tag.archived && tag.name != '-').reduce((acc, tag)=>acc+Number(tag.budget_amount), 0).toFixed(2)}
+            <br />
+            <br />
+          </div>)
+          :
+          null
+        }
         <button onClick={(e)=>{e.preventDefault(); addTag();}} value="addTag">+ add a Subcategory</button>
         <br />
         <div style={{display:"flex", justifyContent:"space-between"}}>
