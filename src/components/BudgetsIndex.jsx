@@ -1,3 +1,14 @@
+import ProgressBar from "./ProgressBar";
+
+const bgColorList = ["yellow", "orange", "green", "red"];
+
+const bgColor = pct => {
+  let index = 0;
+  if (pct > 85 && pct < 97) index = 1;
+  else if (pct >= 97 && pct <= 103) index = 2;
+  else if (pct > 103) index = 3;
+  return bgColorList[index];
+}
 
 export function BudgetsIndex({categories, onEdit }) {
   const CategoryItem = ({cat}) => (
@@ -5,13 +16,14 @@ export function BudgetsIndex({categories, onEdit }) {
       <h3 style={{border:"0px solid gray"}}>{cat.name}</h3>
       <p>Budget: ${cat.budget_amount}</p>
       <p>Actual: ${cat.accumulated}</p>
-      <progress id="file" max={cat.budget_amount} value={cat.accumulated}></progress>
+      <ProgressBar bgcolor={bgColor(cat.accumulated * 100 /cat.budget_amount)} completed={cat.accumulated * 100 /cat.budget_amount} />
+      {/* <progress id="file" max={cat.budget_amount} value={cat.accumulated}></progress> */}
       {/* <ul >
       {cat.tags.filter(tag=>!tag.archived && tag.name != '-').map(tag => (
           <li key={tag.id} style={{border:"0px solid gray"}}>{tag.name}</li>
         ))}
         </ul> */}
-      <div style={{border:"0px solid gray", width:"100%"}}>
+      <div style={{border:"0px solid gray", width:"100%", marginTop:"12px"}}>
         <button style={{float:"right"}} onClick={()=>onEdit(cat)}>more</button>
       </div>
     </div>
