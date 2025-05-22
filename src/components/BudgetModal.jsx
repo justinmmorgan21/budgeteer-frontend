@@ -2,6 +2,7 @@ import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { IoCloseOutline } from "react-icons/io5";
+import ProgressBar from "./ProgressBar";
 
 const TagItem = ({ tag, updateInputTagName, updateInputTagBudget, deleteTag }) => (
   <div style={{ display: 'flex' }}>
@@ -17,7 +18,9 @@ const TagItem = ({ tag, updateInputTagName, updateInputTagBudget, deleteTag }) =
         </div>
         actual: ${tag.accumulated}
       </div>
-      <progress id="file" max={tag.budget_amount} value={tag.accumulated} style={{width:"100%"}}></progress>
+      {tag.budget_amount > 0 ?
+        <ProgressBar actual={tag.accumulated} budget={tag.budget_amount} /> : null
+      }
     </div>
     <a style={{ margin: "auto 0px", display: "inline", cursor: "pointer" }} onClick={(e) => deleteTag(e, tag)}>
       <IoCloseOutline />
