@@ -1,55 +1,57 @@
 import axios from 'axios';
+import { addCategory } from "../utils/CategoryAndTagUtils";
+import { addTag } from "../utils/CategoryAndTagUtils";
 
 export function TransactionsIndex({transactions, categories, setCategories, onEdit, setTransactions, saveScroll}) {
 
-  const addCategory = async () => {
-    const userInput = prompt("Please enter a new category name:", "category name");
-    if (userInput !== null) {
-      const params = new FormData();
-      params.append('name', userInput);
-      try {
-        const postResponse = await axios.post('http://localhost:5000/categories', params);
-        const newCategory = postResponse.data;
+  // const addCategory = async () => {
+  //   const userInput = prompt("Please enter a new category name:", "category name");
+  //   if (userInput !== null) {
+  //     const params = new FormData();
+  //     params.append('name', userInput);
+  //     try {
+  //       const postResponse = await axios.post('http://localhost:5000/categories', params);
+  //       const newCategory = postResponse.data;
   
-        const getResponse = await axios.get('http://localhost:5000/categories');
-        setCategories(getResponse.data);
+  //       const getResponse = await axios.get('http://localhost:5000/categories');
+  //       setCategories(getResponse.data);
 
-        return newCategory.id;
-      } catch (error) {
-        console.error("Error adding category:", error);
-        return null;
-      }
-    } else {
-      console.log("User cancelled the prompt.");
-      return null;
-    }
-  }
+  //       return newCategory.id;
+  //     } catch (error) {
+  //       console.error("Error adding category:", error);
+  //       return null;
+  //     }
+  //   } else {
+  //     console.log("User cancelled the prompt.");
+  //     return null;
+  //   }
+  // }
 
-  const addTag = async (tx) => {
-    const userInput = prompt("Please enter a new tag name for " + tx.category.name + ":", "tag name", tx.category.name);
-    if (userInput !== null) {
-      const params = new FormData();
-      params.append('name', userInput);
-      params.append('category_id', tx.category_id)
-      try {
-        const postResponse = await axios.post('http://localhost:5000/tags', params);
-        return postResponse.data.id;
-      } catch (error) {
-        console.error("Error adding category:", error);
-        return null;
-      }
-    } else {
-      console.log("User cancelled the prompt.");
-      return null;
-    }
-  }
+  // const addTag = async (tx) => {
+  //   const userInput = prompt("Please enter a new tag name for " + tx.category.name + ":", "tag name", tx.category.name);
+  //   if (userInput !== null) {
+  //     const params = new FormData();
+  //     params.append('name', userInput);
+  //     params.append('category_id', tx.category_id)
+  //     try {
+  //       const postResponse = await axios.post('http://localhost:5000/tags', params);
+  //       return postResponse.data.id;
+  //     } catch (error) {
+  //       console.error("Error adding category:", error);
+  //       return null;
+  //     }
+  //   } else {
+  //     console.log("User cancelled the prompt.");
+  //     return null;
+  //   }
+  // }
 
   const handleCategorySelect = async (event, txId) => {
     event.preventDefault();
     const params = new FormData();
     let selection = event.target.value;
     if (selection === 'addCategory') {
-      selection = await addCategory();
+      selection = await addCategory(setCategories);
       if (!selection) {
         event.target.value = "";
         return;

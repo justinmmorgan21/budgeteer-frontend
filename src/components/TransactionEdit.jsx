@@ -1,10 +1,14 @@
 import axios from "axios";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { addCategory } from "../utils/CategoryAndTagUtils";
+import { addTag } from "../utils/CategoryAndTagUtils";
 
 export function TransactionEdit( { onClose, tx, categories, setCategories, onUpdate, setUpdatedCategory, setUpdatedTransaction, saveScroll } ) {
   const [category, setCategory] = useState(tx.category);
+  const [subcategories, setSubcategories] = useState([]);
   const [tag, setTag] = useState(tx.tag);
+  const [split, setSplit] = useState(false);
   const navigate = useNavigate();
 
   const formatDate = (dateString) => {
@@ -27,55 +31,55 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
     return month + "/" + day + "/" + year;
   }
 
-  const addCategory = async () => {
-    const userInput = prompt("Please enter a new category name:", "category name");
-    if (userInput !== null) {
-      const params = new FormData();
-      params.append('name', userInput);
-      try {
-        const postResponse = await axios.post('http://localhost:5000/categories', params);
-        const newCategory = postResponse.data;
+  // const addCategory = async () => {
+  //   const userInput = prompt("Please enter a new category name:", "category name");
+  //   if (userInput !== null) {
+  //     const params = new FormData();
+  //     params.append('name', userInput);
+  //     try {
+  //       const postResponse = await axios.post('http://localhost:5000/categories', params);
+  //       const newCategory = postResponse.data;
   
-        const getResponse = await axios.get('http://localhost:5000/categories');
-        setCategories(getResponse.data);
-        return newCategory;
-      } catch (error) {
-        console.error("Error adding category:", error);
-        return null;
-      }
-    } else {
-      console.log("User cancelled the prompt.");
-      return null;
-    }
-  }
+  //       const getResponse = await axios.get('http://localhost:5000/categories');
+  //       setCategories(getResponse.data);
+  //       return newCategory;
+  //     } catch (error) {
+  //       console.error("Error adding category:", error);
+  //       return null;
+  //     }
+  //   } else {
+  //     console.log("User cancelled the prompt.");
+  //     return null;
+  //   }
+  // }
 
-  const addTag = async () => {
-    const userInput = prompt("Please enter a new tag name for " + tx.category.name + ":", "tag name");
-    if (userInput !== null) {
-      const params = new FormData();
-      params.append('name', userInput);
-      params.append('category_id', category.id)
-      try {
-        const postResponse = await axios.post('http://localhost:5000/tags', params);
-        const newTag = postResponse.data;
+  // const addTag = async () => {
+  //   const userInput = prompt("Please enter a new tag name for " + tx.category.name + ":", "tag name");
+  //   if (userInput !== null) {
+  //     const params = new FormData();
+  //     params.append('name', userInput);
+  //     params.append('category_id', category.id)
+  //     try {
+  //       const postResponse = await axios.post('http://localhost:5000/tags', params);
+  //       const newTag = postResponse.data;
 
-        const getResponse = await axios.get('http://localhost:5000/categories');
-        const newCategory = getResponse.data.find(cat => cat.id == category.id);
-        setCategory(newCategory);
+  //       const getResponse = await axios.get('http://localhost:5000/categories');
+  //       const newCategory = getResponse.data.find(cat => cat.id == category.id);
+  //       setCategory(newCategory);
 
-        saveScroll();
-        setUpdatedCategory(newCategory);
+  //       saveScroll();
+  //       setUpdatedCategory(newCategory);
 
-        return newTag;
-      } catch (error) {
-        console.error("Error adding category:", error);
-        return null;
-      }
-    } else {
-      console.log("User cancelled the prompt.");
-      return null;
-    }
-  }
+  //       return newTag;
+  //     } catch (error) {
+  //       console.error("Error adding category:", error);
+  //       return null;
+  //     }
+  //   } else {
+  //     console.log("User cancelled the prompt.");
+  //     return null;
+  //   }
+  // }
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -99,54 +103,94 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
     })
   }
 
+  const handleCategorySelect = async (event) => {
+    event.preventDefault();
+    // const params = new FormData();
+    // let selection = event.target.value;
+    // if (selection === 'addCategory') {
+    //   selection = await addCategory(setCategories);
+    //   if (!selection) {
+    //     event.target.value = "";
+    //     return;
+    //   }
+    // }
+
+  }
+
+  const initSubcategories = () => {
+    setSubcategories(new Array(2).fill(null));
+    setSplit(true);
+  }
+
+  // useEffect([subcategories])
+
   return (
     <div>
       <span>{formatDate(tx.date)}</span>
       <h3>{tx.payee}</h3>
       <br />
-      <div style={{width:"50%", display:"flex", flexDirection:"row", justifyContent:"space-between"}}>
+      <div style={{display:"flex", flexDirection:"row", justifyContent:"space-between"}}>
         <span>{tx.type}</span>
         <span>${tx.amount}</span>
+        <button onClick={() => {initSubcategories()}}>split</button>
       </div>
       <hr />
       <div style={{ display:"inline"}}>
-        <form onSubmit={handleSubmit} style={{width:"100%", display:"flex", flexDirection:"row", gap:"12px"}}>
-          <label htmlFor="categories"></label>
-          <select onChange={async (e)=>{
-            if (e.target.value === "addCategory") {
-              const newCategory = await addCategory();
-              if (newCategory) {
-                setCategory(newCategory);
+        <form onSubmit={handleSubmit} style={{width:"100%", display:"flex", flexDirection:"column", gap:"12px"}}>
+          <div style={{display:"flex", gap:"12px"}}>
+            <label htmlFor="categories"></label>
+            <select onChange={async (e)=>{
+              if (e.target.value === "addCategory") {
+                const newCategory = await addCategory();
+                if (newCategory) {
+                  setCategory(newCategory);
+                }
+              } else {
+                setCategory(categories.find(cat=>cat.id == e.target.value))
               }
-            } else {
-              setCategory(categories.find(cat=>cat.id == e.target.value))
-            }
-          }} value={category.id} name="category_id">
-            {categories?.map(category => (
-              <option key={category.id} value={category.id}>{category.name}</option>
-            ))}
-            <option value="addCategory">+ add a Category</option>
-          </select>
-          <label htmlFor="tags"></label>
-          <select onChange={async (e)=>{
-            if (e.target.value === "addTag") {
-              const newTag = await addTag();
-              if (newTag) {
-                setTag(newTag)
+            }} value={category.id} name="category_id">
+              {categories?.map(category => (
+                <option key={category.id} value={category.id}>{category.name}</option>
+              ))}
+              <option value="addCategory">+ add a Category</option>
+            </select>
+            <label htmlFor="tags"></label>
+            <select onChange={async (e)=>{
+              if (e.target.value === "addTag") {
+                const newTag = await addTag();
+                if (newTag) {
+                  setTag(newTag)
+                }
+              } else {
+                setTag(category.tags.find(t => t.id == e.target.value))
               }
-            } else {
-              setTag(category.tags.find(t => t.id == e.target.value))
-            }
-          }} value={tag?.id || ""} name="tag_id">
-            <option value="">-- select a tag --</option>
-            {category.tags.filter(tag=>!tag.archived).map(tag => (
-                <option key={tag.id} value={tag.id}>{tag.name}</option>
+            }} value={tag?.id || ""} name="tag_id">
+              <option value="">-- select a tag --</option>
+              {category.tags.filter(tag=>!tag.archived).map(tag => (
+                  <option key={tag.id} value={tag.id}>{tag.name}</option>
+              ))}
+              <option value="addTag">+ add a Tag</option>
+            </select>
+            <input type="submit" value="update"/>
+            <button onClick={()=>reset()}>reset</button>
+            <button onClick={onClose}>cancel</button>
+          </div>
+          <div style={{display:"flex", flexDirection:"column", gap:"6px", visibility: split ? "visible" : "hidden"}}>
+            <span>Split ${tx.amount} into:</span>
+            {/* {subcategories.length} */}
+            {subcategories.map((subcat, i) => (
+              <div key={i}>
+                $ <input type="text" style={{width:"100px"}}/>
+                <select onChange={(event) => handleCategorySelect(event)}>
+                  <option></option>
+                  {categories?.sort((a,b)=>a.name.localeCompare(b.name)).map(category => (
+                    <option key={category.id} value={category.id}>{category.name}</option>
+                  ))}
+                  <option value="addCategory">+ add a Category</option>
+                </select>
+              </div>
             ))}
-            <option value="addTag">+ add a Tag</option>
-          </select>
-          <input type="submit" value="update"/>
-          <button onClick={()=>reset()}>reset</button>
-          <button onClick={onClose}>cancel</button>
+          </div>
         </form>
       </div>
     </div>
