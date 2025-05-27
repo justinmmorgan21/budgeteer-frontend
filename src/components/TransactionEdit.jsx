@@ -1,14 +1,16 @@
 import axios from "axios";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { addCategory } from "../utils/CategoryAndTagUtils";
 import { addTag } from "../utils/CategoryAndTagUtils";
 
 export function TransactionEdit( { onClose, tx, categories, setCategories, onUpdate, setUpdatedCategory, setUpdatedTransaction, saveScroll } ) {
   const [category, setCategory] = useState(tx.category);
+  const [subamounts, setSubamounts] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
   const [tag, setTag] = useState(tx.tag);
   const [split, setSplit] = useState(false);
+  const [subtotal, setSubtotal] = useState(0);
   const navigate = useNavigate();
 
   const formatDate = (dateString) => {
@@ -119,10 +121,20 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
 
   const initSubcategories = () => {
     setSubcategories(new Array(2).fill(null));
+    setSubamounts(new Array(2).fill(0));
     setSplit(true);
   }
 
-  // useEffect([subcategories])
+  const handleInputBlur = (event, index) => {
+    let total = 0
+    setSubamounts(subamounts.map((amount,i) =>
+      i == index ? parseFloat(event.target.value).toFixed(2) : amount
+    ))
+    subamounts.forEach((amount, i) => {
+      total += i == index ? parseFloat(event.target.value) : parseFloat(amount)
+    })
+    setSubtotal(parseFloat(total));
+  }
 
   return (
     <div>
@@ -177,10 +189,9 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
           </div>
           <div style={{display:"flex", flexDirection:"column", gap:"6px", visibility: split ? "visible" : "hidden"}}>
             <span>Split ${tx.amount} into:</span>
-            {/* {subcategories.length} */}
             {subcategories.map((subcat, i) => (
               <div key={i}>
-                $ <input type="text" style={{width:"100px"}}/>
+                $ <input type="text" style={{width:"100px"}} onBlur={e=>handleInputBlur(e,i)}/>
                 <select onChange={(event) => handleCategorySelect(event)}>
                   <option></option>
                   {categories?.sort((a,b)=>a.name.localeCompare(b.name)).map(category => (
@@ -190,6 +201,7 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
                 </select>
               </div>
             ))}
+            <span>(${(tx.amount - subtotal).toFixed(2)} left)</span>
           </div>
         </form>
       </div>
