@@ -1,8 +1,9 @@
 import axios from "axios";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { addCategory } from "../utils/CategoryAndTagUtils";
 import { addTag } from "../utils/CategoryAndTagUtils";
+import { IoCloseOutline } from "react-icons/io5";
 
 export function TransactionEdit( { onClose, tx, categories, setCategories, onUpdate, setUpdatedCategory, setUpdatedTransaction, saveScroll } ) {
   const [category, setCategory] = useState(tx.category);
@@ -119,22 +120,41 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
 
   }
 
-  const initSubcategories = () => {
+  const initSplits = () => {
     setSubcategories(new Array(2).fill(null));
     setSubamounts(new Array(2).fill(0));
     setSplit(true);
   }
 
-  const handleInputBlur = (event, index) => {
-    let total = 0
-    setSubamounts(subamounts.map((amount,i) =>
-      i == index ? parseFloat(event.target.value).toFixed(2) : amount
-    ))
-    subamounts.forEach((amount, i) => {
-      total += i == index ? parseFloat(event.target.value) : parseFloat(amount)
-    })
-    setSubtotal(parseFloat(total));
+  const incrementSplits = (event) => {
+    event.preventDefault();
+    setSubcategories([...subcategories, null]);
+    setSubamounts([...subamounts, 0]);
   }
+
+  const deleteSplitItem = (index) => {
+    const valToRemove = subamounts[index];
+    setSubtotal(subtotal - valToRemove);
+    console.log("index: ", index);
+    console.log(subamounts);
+    setSubcategories(prev => [
+      ...prev.slice(0, index), ...prev.slice(index + 1)
+    ]);
+    setSubamounts(prev => [
+      ...prev.slice(0, index), ...prev.slice(index + 1)
+    ]);
+  }
+
+  const handleInputChange = (event, index) => {
+    const newAmounts = [...subamounts];
+    newAmounts[index] = event.target.value;
+    setSubamounts(newAmounts);
+  }
+
+  useEffect(() => {
+    const total = subamounts.reduce((acc, val) => acc + parseFloat(val || 0), 0);
+    setSubtotal(total);
+  }, [subamounts]);
 
   return (
     <div>
@@ -144,7 +164,7 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
       <div style={{display:"flex", flexDirection:"row", justifyContent:"space-between"}}>
         <span>{tx.type}</span>
         <span>${tx.amount}</span>
-        <button onClick={() => {initSubcategories()}}>split</button>
+        <button onClick={() => {initSplits()}}>split</button>
       </div>
       <hr />
       <div style={{ display:"inline"}}>
@@ -190,8 +210,8 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
           <div style={{display:"flex", flexDirection:"column", gap:"6px", visibility: split ? "visible" : "hidden"}}>
             <span>Split ${tx.amount} into:</span>
             {subcategories.map((subcat, i) => (
-              <div key={i}>
-                $ <input type="text" style={{width:"100px"}} onBlur={e=>handleInputBlur(e,i)}/>
+              <div key={i} style={{display:"flex", gap:"12px"}}>
+                $ <input type="text" style={{width:"100px"}} value={subamounts[i] || ""} onChange={(e) => handleInputChange(e,i)} />
                 <select onChange={(event) => handleCategorySelect(event)}>
                   <option></option>
                   {categories?.sort((a,b)=>a.name.localeCompare(b.name)).map(category => (
@@ -199,9 +219,13 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
                   ))}
                   <option value="addCategory">+ add a Category</option>
                 </select>
+                <a style={{ margin: "auto 0px", display: "inline", cursor: "pointer" }} onClick={() => deleteSplitItem(i)}>
+                  <IoCloseOutline />
+                </a>
               </div>
             ))}
             <span>(${(tx.amount - subtotal).toFixed(2)} left)</span>
+            <button style={{width:"25%"}} onClick={e=>incrementSplits(e)}>+ add a split item</button>
           </div>
         </form>
       </div>
