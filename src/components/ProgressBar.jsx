@@ -7,7 +7,7 @@ const ProgressBar = (props) => {
 
   const bgColor = pct => {
     let index = 0;
-    if (pct > 85 && pct < 97) index = 1;
+    if (pct > 80 && pct < 97) index = 1;
     else if (pct >= 97 && pct <= 103) index = 2;
     else if (pct > 103) index = 3;
     return bgColorList[index];
