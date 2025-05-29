@@ -189,7 +189,7 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
             <label htmlFor="tags"></label>
             <select onChange={async (e)=>{
               if (e.target.value === "addTag") {
-                const newTag = await addTag();
+                const newTag = await addTag(tx);
                 if (newTag) {
                   setTag(newTag)
                 }
@@ -224,7 +224,7 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
                 </a>
               </div>
             ))}
-            <span>(${(tx.amount - subtotal).toFixed(2)} left)</span>
+            <span>(${(tx.amount - subtotal).toFixed(2) >= 0 ? Math.abs(tx.amount - subtotal).toFixed(2) : (tx.amount - subtotal).toFixed(2)} left)</span>
             <button style={{width:"25%"}} onClick={e=>incrementSplits(e)}>+ add a split item</button>
           </div>
         </form>
