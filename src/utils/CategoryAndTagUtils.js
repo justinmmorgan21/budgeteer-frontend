@@ -23,7 +23,7 @@ export async function addCategory(setCategories) {
   }
 }
 
-export async function addTag(tx) {
+export async function addTag(tx, category, setCategory, setUpdatedCategory) {
   const userInput = prompt("Please enter a new tag name for " + tx.category.name + ":", "tag name", tx.category.name);
   if (userInput !== null) {
     const params = new FormData();
@@ -31,7 +31,12 @@ export async function addTag(tx) {
     params.append('category_id', tx.category_id)
     try {
       const postResponse = await axios.post('http://localhost:5000/tags', params);
-      return postResponse.data.id;
+      const newTag = postResponse.data;
+      const getResponse = await axios.get('http://localhost:5000/categories');
+      const newCategory = getResponse.data.find(cat => cat.id == category.id);
+      setCategory(newCategory);
+      setUpdatedCategory(newCategory);
+      return newTag;
     } catch (error) {
       console.error("Error adding category:", error);
       return null;

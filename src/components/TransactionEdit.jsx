@@ -4,11 +4,13 @@ import { useNavigate } from "react-router-dom";
 import { addCategory } from "../utils/CategoryAndTagUtils";
 import { addTag } from "../utils/CategoryAndTagUtils";
 import { IoCloseOutline } from "react-icons/io5";
+import { FaCheck } from "react-icons/fa";
 
 export function TransactionEdit( { onClose, tx, categories, setCategories, onUpdate, setUpdatedCategory, setUpdatedTransaction, saveScroll } ) {
   const [category, setCategory] = useState(tx.category);
-  const [subamounts, setSubamounts] = useState([]);
-  const [subcategories, setSubcategories] = useState([]);
+  const [splitAmounts, setSplitAmounts] = useState([]);
+  const [splitCategories, setSplitCategories] = useState([]);
+  const [splitTags, setSplitTags] = useState([]);
   const [tag, setTag] = useState(tx.tag);
   const [split, setSplit] = useState(false);
   const [subtotal, setSubtotal] = useState(0);
@@ -106,55 +108,74 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
     })
   }
 
-  const handleCategorySelect = async (event) => {
+  const handleSplitCategorySelect = async (event, index) => {
     event.preventDefault();
-    // const params = new FormData();
-    // let selection = event.target.value;
-    // if (selection === 'addCategory') {
-    //   selection = await addCategory(setCategories);
-    //   if (!selection) {
-    //     event.target.value = "";
-    //     return;
-    //   }
-    // }
+    let selection = event.target.value;
+    if (selection === 'addCategory') {
+      selection = await addCategory(setCategories);
+      if (!selection) {
+        event.target.value = "";
+        return;
+      }
+    }
+    setSplitCategories(splitCategories.map((cat,i) => index === i ? categories.find(cat=>cat.id == selection) : cat))
+  }
 
+  const handleSplitTagSelect = async (event, index) => {
+    event.preventDefault();
+    console.log(index);
+    console.log(event.target.value);
+    let selection = event.target.value;
+    if (selection === 'addTag') {
+      selection = await addTag(splitCategories[index]);
+      if (!selection) {
+        event.target.value = "";
+        return;
+      }
+    }
+    setSplitTags(splitTags.map((tag,i) => index === i ? splitCategories[index].tags.find(t=>t.id == selection) : tag));
   }
 
   const initSplits = () => {
-    setSubcategories(new Array(2).fill(null));
-    setSubamounts(new Array(2).fill(0));
+    setSplitAmounts(new Array(2).fill(0));
+    setSplitCategories(new Array(2).fill(null));
+    setSplitTags(new Array(2).fill(null));
     setSplit(true);
   }
 
   const incrementSplits = (event) => {
     event.preventDefault();
-    setSubcategories([...subcategories, null]);
-    setSubamounts([...subamounts, 0]);
+    setSplitAmounts([...splitAmounts, 0]);
+    setSplitCategories([...splitCategories, null]);
+    setSplitTags([...splitTags, null]);
   }
 
   const deleteSplitItem = (index) => {
-    const valToRemove = subamounts[index];
+    const valToRemove = splitAmounts[index];
     setSubtotal(subtotal - valToRemove);
     console.log("index: ", index);
-    console.log(subamounts);
-    setSubcategories(prev => [
+    console.log(splitAmounts);
+    setSplitCategories(prev => [
       ...prev.slice(0, index), ...prev.slice(index + 1)
     ]);
-    setSubamounts(prev => [
+    setSplitAmounts(prev => [
+      ...prev.slice(0, index), ...prev.slice(index + 1)
+    ]);
+    setSplitTags(prev => [
       ...prev.slice(0, index), ...prev.slice(index + 1)
     ]);
   }
 
   const handleInputChange = (event, index) => {
-    const newAmounts = [...subamounts];
+    const newAmounts = [...splitAmounts];
     newAmounts[index] = event.target.value;
-    setSubamounts(newAmounts);
+    setSplitAmounts(newAmounts);
   }
 
   useEffect(() => {
-    const total = subamounts.reduce((acc, val) => acc + parseFloat(val || 0), 0);
+    const total = splitAmounts.reduce((acc, val) => acc + parseFloat(val || 0), 0);
     setSubtotal(total);
-  }, [subamounts]);
+  }, [splitAmounts]);
 
   return (
     <div>
@@ -173,7 +194,7 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
             <label htmlFor="categories"></label>
             <select onChange={async (e)=>{
               if (e.target.value === "addCategory") {
-                const newCategory = await addCategory();
+                const newCategory = await addCategory(setCategories);
                 if (newCategory) {
                   setCategory(newCategory);
                 }
@@ -189,7 +210,7 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
             <label htmlFor="tags"></label>
             <select onChange={async (e)=>{
               if (e.target.value === "addTag") {
-                const newTag = await addTag(tx);
+                const newTag = await addTag(tx, category, setCategory, setUpdatedCategory);
                 if (newTag) {
                   setTag(newTag)
                 }
@@ -198,7 +219,7 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
               }
             }} value={tag?.id || ""} name="tag_id">
               <option value="">-- select a tag --</option>
-              {category.tags.filter(tag=>!tag.archived).map(tag => (
+              {category.tags?.filter(tag=>!tag.archived).map(tag => (
                   <option key={tag.id} value={tag.id}>{tag.name}</option>
               ))}
               <option value="addTag">+ add a Tag</option>
@@ -209,23 +230,44 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
           </div>
           <div style={{display:"flex", flexDirection:"column", gap:"6px", visibility: split ? "visible" : "hidden"}}>
             <span>Split ${tx.amount} into:</span>
-            {subcategories.map((subcat, i) => (
+            {splitAmounts.map((subcat, i) => (
               <div key={i} style={{display:"flex", gap:"12px"}}>
-                $ <input type="text" style={{width:"100px"}} value={subamounts[i] || ""} onChange={(e) => handleInputChange(e,i)} />
-                <select onChange={(event) => handleCategorySelect(event)}>
+                $ <input type="text" style={{width:"100px"}} value={splitAmounts[i] || ""} onChange={(e) => handleInputChange(e,i)} />
+                <select onChange={(event) => handleSplitCategorySelect(event, i)}>
                   <option></option>
                   {categories?.sort((a,b)=>a.name.localeCompare(b.name)).map(category => (
                     <option key={category.id} value={category.id}>{category.name}</option>
                   ))}
                   <option value="addCategory">+ add a Category</option>
                 </select>
+                {splitCategories[i] != null ?
+                  <select onChange={(event) => handleSplitTagSelect(event, i)}>
+                    <option></option>
+                    {splitCategories[i]?.tags.sort((a,b)=>a.name.localeCompare(b.name)).map(tag => (
+                      <option key={tag.id} value={tag.id}>{tag.name}</option>
+                    ))}
+                    <option value="addCategory">+ add a Category</option>
+                  </select>
+                  :
+                  null
+                }
                 <a style={{ margin: "auto 0px", display: "inline", cursor: "pointer" }} onClick={() => deleteSplitItem(i)}>
                   <IoCloseOutline />
                 </a>
               </div>
             ))}
-            <span>(${(tx.amount - subtotal).toFixed(2) >= 0 ? Math.abs(tx.amount - subtotal).toFixed(2) : (tx.amount - subtotal).toFixed(2)} left)</span>
+            {Math.abs(tx.amount - subtotal) < 0.01 ?
+              <div style={{color:"green"}}>
+                <span>(${Math.abs(tx.amount - subtotal).toFixed(2)} left)</span>
+                <FaCheck />
+              </div>
+              :
+              <span style={{color:"red"}}>
+                (${(tx.amount - subtotal).toFixed(2) >= 0 ? Math.abs(tx.amount - subtotal).toFixed(2) : (tx.amount - subtotal).toFixed(2)} left)
+              </span>
+            }
             <button style={{width:"25%"}} onClick={e=>incrementSplits(e)}>+ add a split item</button>
+            <button onClick={(e)=>{e.preventDefault(); console.log("splitTags: ", splitTags);}}>test</button>
           </div>
         </form>
       </div>
