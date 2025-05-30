@@ -11,6 +11,7 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
   const [splitAmounts, setSplitAmounts] = useState([]);
   const [splitCategories, setSplitCategories] = useState([]);
   const [splitTags, setSplitTags] = useState([]);
+  // const [splits, setSplits] = useState([]);
   const [tag, setTag] = useState(tx.tag);
   const [split, setSplit] = useState(false);
   const [subtotal, setSubtotal] = useState(0);
@@ -91,8 +92,23 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
     const params = new FormData(event.target);
     axios.patch(`http://localhost:5000/transactions/${tx.id}`, params).then(response => {
       onUpdate(response.data);
-      onClose();
-      navigate(`/transactions`);
+      if (splitAmounts.length > 0) {
+        const postPromises = splitAmounts.map((amount, i) => {
+          const splitParams = new FormData();
+          splitParams.append('amount', amount);
+          splitParams.append('category_id', splitCategories[i].id);
+          splitParams.append('tag_id', splitTags[i].id);
+          splitParams.forEach((v,k)=>console.log(k, ": ", v));
+          return axios.post(`http://localhost:5000/transactions/${tx.id}`, splitParams);
+        })
+        Promise.all(postPromises).then(()=>{
+          onClose();
+          navigate(`/transactions`);
+        })
+      } else {
+        onClose();
+        navigate(`/transactions`);
+      }
     })
   }
 
