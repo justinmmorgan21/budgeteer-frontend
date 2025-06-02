@@ -13,6 +13,7 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
   const [split, setSplit] = useState(false);
   const [subtotal, setSubtotal] = useState(0);
   const navigate = useNavigate();
+  const hasChildTransactions = tx.child_transactions.length > 0;
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -154,22 +155,24 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
     }))
   }
 
-  const initSplits = () => {
-    setSplits(new Array(2).fill(null).map(() => ({
-      amount: 0,
-      category: null,
-      tag: null
-    })));
-    setSplit(true);
+  const initSplits = async () => {
+    if (tx.child_transactions.length > 0) {
+      const responses = await Promise.all(
+          tx.child_transactions.map(child_id =>
+            axios.get(`http://localhost:5000/transactions/${child_id}`)
+        )
+      );
+      setSplits(responses.map(response => {
+        return {amount: response.data.amount, category: response.data.category, tag: response.data.tag}
+      }));
+    } else {
+      setSplits(new Array(2).fill(null).map(() => ({amount: 0, category: null, tag: null})));
+    }
   }
 
   const incrementSplits = (event) => {
     event.preventDefault();
-    setSplits([...splits, {
-      amount: 0,
-      category: null,
-      tag: null
-    }])
+    setSplits([...splits, {amount: 0, category: null, tag: null}]);
   }
 
   const deleteSplitItem = (index) => {
@@ -187,9 +190,11 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
   }
 
   useEffect(() => {
-    const total = splits.map(split=>split.amount).reduce((acc, val) => acc + parseFloat(val || 0), 0);
+    const total = splits.map(split => split ? split.amount : 0).reduce((acc, val) => acc + parseFloat(val || 0), 0);
     setSubtotal(total);
   }, [splits]);
+
+  useEffect(() => initSplits, []);
 
   return (
     <div>
@@ -199,7 +204,7 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
       <div style={{display:"flex", flexDirection:"row", justifyContent:"space-between"}}>
         <span>{tx.type}</span>
         <span>${tx.amount}</span>
-        <button onClick={() => {initSplits()}}>split</button>
+        <button style={{visibility: hasChildTransactions ? "hidden" : "visible"}} onClick={()=>setSplit(true)}>split</button>
       </div>
       <hr />
       <div style={{ display:"inline"}}>
@@ -242,20 +247,20 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
             <button onClick={()=>reset()}>reset</button>
             <button onClick={onClose}>cancel</button>
           </div>
-          <div style={{display:"flex", flexDirection:"column", gap:"6px", visibility: split ? "visible" : "hidden"}}>
+          <div style={{display:"flex", flexDirection:"column", gap:"6px", visibility: split || hasChildTransactions ? "visible" : "hidden"}}>
             <span>Split ${tx.amount} into:</span>
             {splits.map((split, i) => (
               <div key={i} style={{display:"flex", gap:"12px"}}>
-                $ <input type="text" style={{width:"100px"}} value={split.amount || ""} onChange={(e) => handleInputChange(e,i)} />
-                <select onChange={(event) => handleSplitCategorySelect(event, i)}>
+                $ <input type="text" style={{width:"100px"}} value={split?.amount || ""} onChange={(e) => handleInputChange(e,i)} />
+                <select onChange={(event) => handleSplitCategorySelect(event, i)} value={split.category ? split.category.id : ""}>
                   <option></option>
                   {categories?.sort((a,b)=>a.name.localeCompare(b.name)).map(category => (
                     <option key={category.id} value={category.id}>{category.name}</option>
                   ))}
                   <option value="addCategory">+ add a Category</option>
                 </select>
-                {split.category != null ?
-                  <select onChange={(event) => handleSplitTagSelect(event, i)}>
+                {split?.category != null ?
+                  <select onChange={(event) => handleSplitTagSelect(event, i)} value={split.tag ? split.tag.id : ""}>
                     <option></option>
                     {split.category?.tags.sort((a,b)=>a.name.localeCompare(b.name)).map(tag => (
                       <option key={tag.id} value={tag.id}>{tag.name}</option>
@@ -281,7 +286,7 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
               </span>
             }
             <button style={{width:"25%"}} onClick={e=>incrementSplits(e)}>+ add a split item</button>
-            <button onClick={(e)=>{e.preventDefault(); console.log("splits: ", splits); console.log("subtotal: ", subtotal)}}>test</button>
+            {/* <button onClick={(e)=>{e.preventDefault(); console.log("splits: ", splits); console.log("subtotal: ", subtotal)}}>test</button> */}
           </div>
         </form>
       </div>
