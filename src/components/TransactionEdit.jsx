@@ -88,21 +88,24 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
   const handleSubmit = (event) => {
     event.preventDefault();
     const params = new FormData(event.target);
-    axios.patch(`http://localhost:5000/transactions/${tx.id}`, params).then(response => {
-      onUpdate(response.data);
-      if (splits.length > 0) {
-        const postPromises = splits.map((split) => {
-          const splitParams = new FormData();
-          splitParams.append('amount', split.amount);
-          splitParams.append('category_id', split.category.id);
-          splitParams.append('tag_id', split.tag.id);
-          return axios.post(`http://localhost:5000/transactions/${tx.id}`, splitParams);
-        })
-        Promise.all(postPromises).then(()=>{
-          onClose();
-          navigate(`/transactions`);
-        })
+    axios.patch(`http://localhost:5000/transactions/${tx.id}`, params).then((response) => {
+      if (split && splits.length > 0 || tx.child_transactions.length > 0) {
+        const jsonData = JSON.stringify(splits);
+        const splitParams = new FormData();
+        splitParams.append('splits', splits);
+        axios.post(`http://localhost:5000/transactions/${tx.id}`, jsonData, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }).then(() => {
+          axios.get(`http://localhost:5000/transactions/${tx.id}`).then(response => {
+            onUpdate(response.data);
+            onClose();
+            navigate('/transactions');
+          })
+        });
       } else {
+        onUpdate(response.data);
         onClose();
         navigate(`/transactions`);
       }
@@ -204,7 +207,7 @@ export function TransactionEdit( { onClose, tx, categories, setCategories, onUpd
       <div style={{display:"flex", flexDirection:"row", justifyContent:"space-between"}}>
         <span>{tx.type}</span>
         <span>${tx.amount}</span>
-        <button style={{visibility: hasChildTransactions ? "hidden" : "visible"}} onClick={()=>setSplit(true)}>split</button>
+        <button style={{visibility: hasChildTransactions || split ? "hidden" : "visible"}} onClick={()=>setSplit(true)}>split</button>
       </div>
       <hr />
       <div style={{ display:"inline"}}>
