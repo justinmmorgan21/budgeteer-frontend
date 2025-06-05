@@ -37,6 +37,7 @@ export function TransactionsPage() {
   }
 
   const handleTxEdit = (tx) => {
+    saveScroll();
     setModalVisible(true);
     setCurrentTx(tx);
   }

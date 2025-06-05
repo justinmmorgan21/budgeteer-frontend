@@ -11,6 +11,9 @@ export function BudgetsPage() {
   const [ modalVisible, setModalVisible ] = useState(false);
   const [ currentCat, setCurrentCat ] = useState(null);
   const navigate = useNavigate();
+  const [ startDate, setStartDate ] = useState();
+  const [ endDate, setEndDate ] = useState();
+  const [ isDateFormVisible, setIsDateFormVisible] = useState(false);
 
   const handleClose = () => {
     setModalVisible(false);
@@ -56,12 +59,41 @@ export function BudgetsPage() {
     }
   }
 
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (e.target instanceof HTMLFormElement) {
+      const params = new FormData(e.target);
+      params.forEach((v,k)=>console.log(k, ": ", v))
+      axios.get("http://localhost:5000/categories", {
+        params: {
+          startDate: params.get('startDate'),
+          endDate: params.get('endDate')
+        }
+      }).then(response => setCategories(response.data))
+    } else {
+      setIsDateFormVisible(false);
+      setStartDate("");
+      setEndDate("");
+      axios.get("http://localhost:5000/categories").then(response =>
+        setCategories(response.data)
+      )
+    }
+  };
+
   return (
     <main style={{width:"80%", margin:"20px auto"}}>
       <div style={{display:"flex", height:"fit-content", alignItems:"center"}}>
         <div style={{display:"flex", alignItems:"center", flex:"1 1 auto", gap:"48px"}}>
           <h1>All Budgets</h1>
           <button onClick={()=>addCategory()}>+ add a category</button>
+          <button onClick={()=>setIsDateFormVisible(true)} style={{visibility:isDateFormVisible ? "hidden" : "visible"}}>Search custom dates</button>
+          <form onSubmit={handleSearch} style={{visibility:!isDateFormVisible ? "hidden" : "visible"}}>
+            <input type="date" name="startDate" onChange={(e)=>setStartDate(e.target.value)} value={startDate} />
+            <span> to </span>
+            <input type="date" name="endDate" onChange={(e)=>setEndDate(e.target.value)} value={endDate} />
+            <input type="submit" style={{ padding:"6px 8px", margin:"0 6px"}} value="Select"/>
+            <button onClick={(e)=>{handleSearch(e)}} style={{ padding:"6px 8px"}}>Cancel</button>
+          </form>
         </div>
         <button onClick={()=>navigate('/archived')}>Archived {'>>>'}</button>
       </div>
