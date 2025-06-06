@@ -1,26 +1,26 @@
 import React from "react";
 import ReactApexChart from "react-apexcharts";
 
-export function BarChart() {
+export function BarChart(data) {
+  const categories = data.data;
+  console.log(categories[0]);
   const [state] = React.useState({
     series: [
       {
-        name: "Net Profit",
-        data: [44, 55, 57, 56, 61, 58, 63, 60, 66],
+        name: "Budget",
+        // data: [44, 55, 57, 56, 61, 58, 63, 60, 66],
+        data: categories.map(cat => cat.name == "Income" ? null : cat.budget_amount)
       },
       {
-        name: "Revenue",
-        data: [76, 85, 101, 98, 87, 105, 91, 114, 94],
-      },
-      {
-        name: "Free Cash Flow",
-        data: [35, 41, 36, 26, 45, 48, 52, 53, 41],
-      },
+        name: "Actual",
+        // data: [76, 85, 101, 98, 87, 105, 91, 114, 94],
+        data: categories.map(cat => cat.name == "Income" ? null : cat.accumulated)
+      }
     ],
     options: {
       chart: {
         type: "bar",
-        height: 350,
+        height: 550,
       },
       plotOptions: {
         bar: {
@@ -39,7 +39,8 @@ export function BarChart() {
         colors: ["transparent"],
       },
       xaxis: {
-        categories: ["Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"],
+        // categories: ["Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"],
+        categories: categories.map(cat => cat.name == "income" ? null : cat.name)
       },
       yaxis: {
         title: {
@@ -63,7 +64,7 @@ export function BarChart() {
         options={state.options}
         series={state.series}
         type="bar"
-        height={350}
+        height={550}
       />
     </div>
   );
