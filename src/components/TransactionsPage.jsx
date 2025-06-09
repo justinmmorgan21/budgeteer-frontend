@@ -8,6 +8,7 @@ import axios from 'axios';
 
 export function TransactionsPage() {
   const { transactionsData: loadedTransactionsData, cat } = useLoaderData();
+  const [ perPage, setPerPage ] = useState(25);
   const [ transactions, setTransactions ] = useState(loadedTransactionsData.transactions);
   const [ categories, setCategories ] = useState(cat);
   const [ modalVisible, setModalVisible ] = useState(false);
@@ -60,7 +61,7 @@ export function TransactionsPage() {
     params.append('uploadType', statementChecked ? 'statement' : 'currentHistory');
     axios.post("http://localhost:5000/transactions/upload", params).then(() => {
       setCurrentPage(1);
-      axios.get(`http://localhost:5000/transactions?page=${1}&per_page=${25}`).then(response => {
+      axios.get(`http://localhost:5000/transactions?page=${1}&per_page=${perPage}`).then(response => {
         setTransactions(response.data.transactions);
         fileInputRef.current.value = null;
         setTotalPages(response.data.total_pages);
@@ -74,7 +75,7 @@ export function TransactionsPage() {
     axios.get(`http://localhost:5000/transactions`, {
       params: {
         page: newPageNum,
-        per_page: 25,
+        per_page: perPage,
         search: searchText,
         startDate: startDate,
         endDate: endDate,
@@ -85,7 +86,7 @@ export function TransactionsPage() {
     })
   }
 
-  const FileUpload = () => {
+  const FileUploadForm = () => {
     return (
       <form style={{border:"1px solid black", padding:"12px", borderRadius:"5px"}} onSubmit={(event)=>fileUpload(event)}>
         <div style={{display:'flex', flexDirection:"column", gap:"8px"}}>
@@ -151,7 +152,7 @@ export function TransactionsPage() {
     axios.get(`http://localhost:5000/transactions`, {
       params: {
         page: 1,
-        per_page: 25,
+        per_page: perPage,
         search: searchValue,
         startDate: startDateValue,
         endDate: endDateValue,
@@ -168,7 +169,7 @@ export function TransactionsPage() {
     axios.get(`http://localhost:5000/transactions`, {
       params: {
         page: 1,
-        per_page: 25,
+        per_page: perPage,
         search: searchText,
         startDate: startDate,
         endDate: endDate,
@@ -206,16 +207,46 @@ export function TransactionsPage() {
     }
   }, [transactions]);
 
+  useEffect(() => {
+    axios.get(`http://localhost:5000/transactions`, {
+      params: {
+        page: 1,
+        per_page: perPage,
+        search: searchText,
+        startDate: startDate,
+        endDate: endDate,
+        uncategorized: uncategorized
+      }
+    }).then(response => {
+      setTransactions(response.data.transactions);
+      setTotalPages(response.data.total_pages);
+      setCurrentPage(1);
+    });
+  }, [perPage]);
+
   return (
     <main style={{width:"80%", margin:"20px auto", border:"0px solid black"}}>
       <div style={{display:"flex", alignItems:"center", justifyContent:"space-between"}}>
         <h1>All transactions</h1>
-        <FileUpload />
+        <FileUploadForm />
       </div>
       <ListCustomizer searchText={searchText} setSearchText={setSearchText} startDate={startDate} setStartDate={setStartDate} endDate={endDate} 
                       setEndDate={setEndDate} handleSearch={handleSearch}/>
       <br />
-      <input type="checkbox" checked={uncategorized} onChange={()=>handleUncategorized()} />show uncategorized
+      <div style={{display:"flex", flexDirection:"row", justifyContent:"space-between"}}>
+        <span>
+          <input type="checkbox" checked={uncategorized} onChange={()=>handleUncategorized()} />show uncategorized
+        </span>
+        <div style={{marginRight:"42px"}}>
+          <span>transactions per page: </span>
+          <select onChange={(event) => setPerPage(parseInt(event.target.value))} value={perPage}>
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+      </div>
       <br />
       <br />
       <TransactionsIndex transactions={transactions} categories={categories} setCategories={setCategories} onEdit={handleTxEdit} 

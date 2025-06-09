@@ -63,7 +63,6 @@ export function BudgetsPage() {
     e.preventDefault();
     if (e.target instanceof HTMLFormElement) {
       const params = new FormData(e.target);
-      params.forEach((v,k)=>console.log(k, ": ", v))
       axios.get("http://localhost:5000/categories", {
         params: {
           startDate: params.get('startDate'),
