@@ -11,12 +11,26 @@
 import { useLoaderData } from "react-router-dom";
 import { BarChart } from "./BarChart"; // adjust path if needed
 import { LineChart } from "./LineChart";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import axios from 'axios';
 
 export function Home() {
   const loadedCategories = useLoaderData();
   const [ bigCategories, setBigCategories ] = useState(loadedCategories.filter(cat => cat.budget_amount >= 200));
   const [ smallCategories, setSmallCategories ] = useState(loadedCategories.filter(cat => cat.budget_amount < 200));
+
+  const testDates = () => {
+
+    axios.get("http://localhost:5000/categories", {
+        params: {
+          startDate: '2025-05-01',
+          endDate: '2025-05-30'
+        }
+      }).then(response => {
+        setBigCategories(response.data.filter(cat=>cat.budget_amount >= 200));
+        setSmallCategories(response.data.filter(cat=>cat.budget_amount < 200));
+    })
+  }
 
   return (
     <div>
@@ -26,7 +40,7 @@ export function Home() {
         <BarChart data={bigCategories} title={"Big Budgets"}/>
       </div>
         {/* <LineChart /> */}
-      {/* <button onClick={()=>console.log(loadedCategories)}>PRINT LOG 1</button> */}
+      <button onClick={()=>testDates()}>update dates</button>
     </div>
   );
 };
