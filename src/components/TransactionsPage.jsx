@@ -227,7 +227,7 @@ export function TransactionsPage() {
   return (
     <main style={{width:"80%", margin:"20px auto", border:"0px solid black"}}>
       <div style={{display:"flex", alignItems:"center", justifyContent:"space-between"}}>
-        <h1>All transactions</h1>
+        <h1>All Transactions</h1>
         <FileUploadForm />
       </div>
       <ListCustomizer searchText={searchText} setSearchText={setSearchText} startDate={startDate} setStartDate={setStartDate} endDate={endDate} 
@@ -238,7 +238,7 @@ export function TransactionsPage() {
           <input type="checkbox" checked={uncategorized} onChange={()=>handleUncategorized()} />show uncategorized
         </span>
         <div style={{marginRight:"42px"}}>
-          <span>transactions per page: </span>
+          <span>Transactions per page: </span>
           <select onChange={(event) => setPerPage(parseInt(event.target.value))} value={perPage}>
             <option value="10">10</option>
             <option value="25">25</option>

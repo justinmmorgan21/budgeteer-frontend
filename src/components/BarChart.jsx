@@ -1,15 +1,15 @@
 import ReactApexChart from "react-apexcharts";
 
-export function BarChart({data, title}) {
+export function BarChart({data, title, numberOfMonths}) {
   const filteredData = data.filter(cat => cat.name !== "Income");
     const series = [
       {
-        name: "Budget",
-        data: filteredData.map(cat => cat.budget_amount)
+        name: "Actual",
+        data: filteredData.map(cat => (cat.accumulated / numberOfMonths).toFixed(2))
       },
       {
-        name: "Actual",
-        data: filteredData.map(cat => cat.accumulated)
+        name: "Budget",
+        data: filteredData.map(cat => cat.budget_amount)
       },
     ];
     const options = {
@@ -38,7 +38,7 @@ export function BarChart({data, title}) {
       },
       yaxis: {
         title: {
-          text: "$ (thousands)",
+          text: "$",
         },
       },
       fill: {
@@ -46,7 +46,7 @@ export function BarChart({data, title}) {
       },
       tooltip: {
         y: {
-          formatter: (val) => "$ " + val + " thousands",
+          formatter: (val) => "$ " + val,
         },
       },
     };
